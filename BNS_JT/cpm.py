@@ -655,9 +655,6 @@ class Cpm(object):
 
         assert isinstance(M, Cpm), f'M should be an instance of Cpm'
 
-        if self.C.shape[1] > M.C.shape[1]:
-            return M.product(self)
-
         first = [x.name for x in self.variables[:self.no_child]]
         second = [x.name for x in M.variables[:M.no_child]]
         check = set(first).intersection(second)
@@ -679,12 +676,9 @@ class Cpm(object):
 
         if self.C.size or self.Cs.size:
             idx_vars, _ = ismember(self.variables, M.variables)
-            com_vars = get_value_given_condn(self.variables, idx_vars)
             prod_vars = M.variables + get_value_given_condn(self.variables, flip(idx_vars))
 
             new_child = self.variables[:self.no_child] + M.variables[:M.no_child]
-            ##FIXME: sort required?
-            new_child = sorted(new_child)
 
             new_parent = self.variables[self.no_child:] + M.variables[M.no_child:]
             new_parent, _ = setdiff(new_parent, new_child)
@@ -702,35 +696,70 @@ class Cpm(object):
 
 
         if self.C.size:
-            # FIXME: defined but not used
-            #com_vars = list(set(self.variables).intersection(M.variables))
+            new_vars_tf1, new_vars_idx1 = ismember( new_vars, self.variables )
+            new_vars_tf2, new_vars_idx2 = ismember( new_vars, M.variables )
 
-            Cprod, pprod = [], []
-            for i in range(self.C.shape[0]):
+            n_row1 = len(self.C)
+            n_row2 = len(M.C)
 
-                c1 = get_value_given_condn(self.C[i, :], idx_vars)
-                c1_not_com = self.C[i, flip(idx_vars)]
+            Bst_dict = {}
+            for k, v in enumerate(new_vars):
 
-                Mc = M.condition(cnd_vars=com_vars, cnd_states=c1)
+                if new_vars_tf1[k] and new_vars_tf2[k]: # common variable to product
 
-                _cprod = np.append(Mc.C, np.tile(c1_not_com, (Mc.C.shape[0], 1)), axis=1)
+                    n_val = len(v.values)
 
-                Cprod.append(_cprod)
+                    Bvec1 = np.zeros((n_row1, n_val), dtype=int)
+                    Bvec2 = np.zeros((n_row2, n_val), dtype=int)
 
-                if self.p.size:
-                    pprod.append(get_prod(Mc.p, self.p[i]))
+                    C1 = self.C[:, new_vars_idx1[k]]
+                    for i, b in enumerate(C1):
+                        st = list( v.B[ b ] )
+                        Bvec1[i, st] = 1
+                    Bvec1 = np.tile(Bvec1, (n_row2, 1, 1))
 
-            Cprod = np.concatenate(Cprod, axis=0)
-            Cprod = Cprod[:, idx_vars2].astype(int)
-            pprod = np.concatenate(pprod, axis=0)
+                    C2 = M.C[:, new_vars_idx2[k]]
+                    for i, b in enumerate(C2):
+                        st = list( v.B[ b ] )
+                        Bvec2[i, st] = 1
+                    Bvec2 = np.tile(Bvec2[:, np.newaxis, :], (1, n_row1, 1))
 
-        else:
-            Cprod = np.empty((0,len(idx_vars2)), dtype=int)
-            pprod = np.empty((0,1), dtype=float)
+                    Bvec = Bvec1 * Bvec2
+                    Bst = v.get_Bst_from_Bvec( Bvec )
+                    
+                    Bst_dict[v.name] = Bst
 
-        Mprod.C = Cprod
-        Mprod.p = pprod
-        Mprod.sort()
+                elif new_vars_tf1[k]: # it is in self only
+
+                    C1 = self.C[:, new_vars_idx1[k]]
+                    Bst = np.tile(C1.T, (n_row2, 1, 1))
+
+                    Bst_dict[v.name] = Bst
+
+                else: # it is in M only
+
+                    C2 = M.C[:, new_vars_idx2[k]]
+                    Bst = np.tile(C2, (1, n_row1, 1))
+
+                    Bst_dict[v.name] = Bst
+
+            Cnew_list = []
+            for v in new_vars:
+                Cnew_list.append( Bst_dict[v.name].T.reshape(-1) )
+            Cnew = np.column_stack( Cnew_list )
+            #print(Cnew)
+
+            pnew = np.repeat(self.p, n_row2) * np.tile(M.p, (n_row1, 1)).flatten()
+            #print(pnew)
+
+            mask = np.sum( Cnew < 0, axis=1 ) < 1
+            #print(mask)
+
+            Cnew = Cnew[mask]
+            pnew = pnew[mask]
+
+        Mprod.C = Cnew
+        Mprod.p = pnew
 
 
         if self.Cs.size and M.Cs.size:
