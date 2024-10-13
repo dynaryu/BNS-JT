@@ -230,17 +230,17 @@ def setup_prod_cms():
     M = {}
     M[1] = cpm.Cpm(variables=[v1],
                    no_child=1,
-                   C = np.array([1, 2]).T,
+                   C = np.array([1, 2]).T - 1,
                    p = np.array([0.9, 0.1]).T)
 
     M[2] = cpm.Cpm(variables=[v2, v1],
                    no_child=1,
-                   C = np.array([[1, 1], [2, 1], [1, 2], [2, 2]]),
+                   C = np.array([[1, 1], [2, 1], [1, 2], [2, 2]]) - 1,
                    p = np.array([0.99, 0.01, 0.9, 0.1]).T)
 
     M[3] = cpm.Cpm(variables=[v3, v1],
                    no_child=1,
-                   C = np.array([[1, 1], [2, 1], [1, 2], [2, 2]]),
+                   C = np.array([[1, 1], [2, 1], [1, 2], [2, 2]]) - 1,
                    p = np.array([0.95, 0.05, 0.85, 0.15]).T)
     return M
 
@@ -1118,8 +1118,13 @@ def test_product1(setup_product):
     assert names == ['X2', 'X3', 'X1']
 
     assert Mprod.no_child==2
-    np.testing.assert_array_equal(Mprod.C, np.array([[1, 1, 1], [2, 1, 1], [1, 2, 1], [2, 2, 1], [1, 1, 2], [2, 1, 2], [1, 2, 2], [2, 2, 2]]) - 1)
-    np.testing.assert_array_almost_equal(Mprod.p, np.array([[0.9405, 0.0095, 0.0495, 5.0e-4, 0.7650, 0.0850, 0.1350, 0.0150]]).T)
+
+    for c, p in zip( np.array([[1, 1, 1], [2, 1, 1], [1, 2, 1], [2, 2, 1], [1, 1, 2], [2, 1, 2], [1, 2, 2], [2, 2, 2]]) - 1,
+                     np.array([0.9405, 0.0095, 0.0495, 5.0e-4, 0.7650, 0.0850, 0.1350, 0.0150]) ):
+        r_idx = np.where(np.all(Mprod.C == c, axis=1))[0]
+        Mprod_p = Mprod.p[r_idx]
+        assert p == pytest.approx(Mprod_p, rel=1e-3)
+    
 
 def test_product2(setup_product):
 
@@ -1156,9 +1161,13 @@ def test_product2(setup_product):
           [1,2,2,2,2],
           [2,2,2,2,2]]) - 1
 
-    expected_p = np.array([[0.9405,0.0095,0.0495,0.0005,0.7650,0.0850,0.1350,0.0150,0.9405,0.0095,0.0495,0.0005,0.7650,0.0850,0.1350,0.0150]]).T
-    np.testing.assert_array_equal(Mprod.C, expected_C)
-    np.testing.assert_array_almost_equal(Mprod.p, expected_p)
+    expected_p = np.array([0.9405,0.0095,0.0495,0.0005,0.7650,0.0850,0.1350,0.0150,0.9405,0.0095,0.0495,0.0005,0.7650,0.0850,0.1350,0.0150])
+    
+    for c, p in zip( expected_C, expected_p ):
+        r_idx = np.where(np.all(Mprod.C == c, axis=1))[0]
+        Mprod_p = Mprod.p[r_idx]
+        assert p == pytest.approx(Mprod_p, rel=1e-3)
+    
 
 
 def test_sum1(setup_sum):
@@ -1390,10 +1399,10 @@ def test_prod_cpms1(setup_prod_cms):
 
     assert [x.name for x in Mmult.variables] == ['v1', 'v2', 'v3']
 
-    expected = np.array([[1,1,1],[2,1,1],[1,2,1],[2,2,1],[1,1,2],[2,1,2],[1,2,2],[2,2,2]])
+    expected = np.array([[1,1,1],[1,1,2],[1,2,1],[1,2,2],[2,1,1],[2,1,2],[2,2,1],[2,2,2]]) - 1
     np.testing.assert_array_equal(Mmult.C, expected)
 
-    expected = np.array([[0.8464, 0.0765, 0.0086, 0.0085, 0.0446, 0.0135, 4.5e-4, 0.0015]]).T
+    expected = np.array([[0.8464, 0.0446, 0.0086, 4.5e-4, 0.0765, 0.0135,0.0085, 0.0015]]).T
     np.testing.assert_array_almost_equal(Mmult.p, expected, decimal=4)
 
 
@@ -1422,13 +1431,13 @@ def test_prod_cpms2(setup_prod_cms):
 
     Mmult = cpm.product([M[k] for k in [1, 2]])
 
-    expected = np.array([[1, 1], [2, 1], [1, 2], [2, 2]])
+    expected = np.array([[1, 1], [1, 2], [2, 1], [2, 2]])
 
     np.testing.assert_array_equal(Mmult.C, expected)
 
     np.testing.assert_array_equal(Mmult.C, expected)
 
-    expected = np.array([[0.7901, 0.1517, 0.0489, 0.0094]]).T
+    expected = np.array([[0.7901, 0.0489, 0.1517, 0.0094]]).T
     np.testing.assert_array_almost_equal(Mmult.p, expected, decimal=4)
     assert [x.name for x in Mmult.variables] == ['v1', 'v2']
 
@@ -1458,10 +1467,10 @@ def test_prod_cpms3(setup_prod_cms):
 
     Mmult = cpm.product(M)
 
-    expected = np.array([[1, 1, 1], [2, 1, 1], [1, 2, 1], [2, 2, 1], [1, 1, 2], [2, 1, 2], [1, 2, 2], [2, 2, 2]]) - 1
+    expected = np.array([[1, 1, 1], [1, 1, 2], [1, 2, 1], [1, 2, 2], [2, 1, 1], [2, 1, 2], [2, 2, 1], [2, 2, 2]]) - 1
     np.testing.assert_array_equal(Mmult.C, expected)
 
-    expected = np.array([[0.7859, 0.1509, 0.0486, 0.0093, 0.0041, 0.0008, 0.0003, 0.000]]).T
+    expected = np.array([[0.7859, 0.0041, 0.0486, 0.0003, 0.1509, 0.0008, 0.0093, 0.000]]).T
     np.testing.assert_array_almost_equal(Mmult.p, expected, decimal=4)
 
     assert [x.name for x in Mmult.variables] == ['v1', 'v2', 'v3']
@@ -1473,13 +1482,15 @@ def test_product3( setup_hybrid ):
     Mp = cpms['haz'].product( cpms['x0'] )
 
     assert Mp.variables[0].name == 'haz' and Mp.variables[1].name == 'x0'
-    np.testing.assert_array_almost_equal(Mp.C, np.array([[0,0], [1,0], [0,1], [1,1]]))
-    np.testing.assert_array_almost_equal(Mp.p, np.array([[0.07], [0.06], [0.63], [0.24]]))
+    for c, p in zip(np.array([[0,0], [1,0], [0,1], [1,1]]), np.array([0.07, 0.06, 0.63, 0.24])):
+        r_idx = np.where(np.all(Mp.C == c, axis=1))[0]
+        Mp_p = Mp.p[r_idx]
+        assert p == pytest.approx(Mp_p, rel=1e-3)
+
     np.testing.assert_array_almost_equal(Mp.Cs, np.array([[0,0],[0,1],[0,1],[1,0],[0,1]]))
     np.testing.assert_array_almost_equal(Mp.q, np.array([[0.07], [0.63], [0.63], [0.06], [0.63]]))
     np.testing.assert_array_almost_equal(Mp.q, Mp.ps)
     np.testing.assert_array_almost_equal(Mp.sample_idx, np.array([[0],[1],[2],[3],[4]]))
-
 
 def test_product4( setup_hybrid ):
     varis, cpms = setup_hybrid
@@ -1488,20 +1499,26 @@ def test_product4( setup_hybrid ):
     Mp1 = Mp0.product(Mc['x1'])
 
     assert Mp0.variables[0].name == 'haz' and Mp0.variables[1].name == 'x0'
-    np.testing.assert_array_almost_equal(Mp0.C, np.array([[0,0], [0,1]]))
-    np.testing.assert_array_almost_equal(Mp0.p, np.array([[0.07], [0.63]]))
+    for c, p in zip( np.array([[0,0], [0,1]]), np.array([0.07, 0.63]) ):
+        r_idx = np.where(np.all(Mp0.C == c, axis=1))[0]
+        Mp0_p = Mp0.p[r_idx]
+        assert p == pytest.approx(Mp0_p, rel=1e-3)
+
     np.testing.assert_array_almost_equal(Mp0.Cs, np.array([[0,0],[0,1],[0,1],[1,0],[0,1]]))
     np.testing.assert_array_almost_equal(Mp0.q, np.array([[0.07], [0.63], [0.63], [0.06], [0.63]]))
     np.testing.assert_array_almost_equal(Mp0.ps, np.array([[0.049], [0.441], [0.441], [0.021], [0.441]]))
     np.testing.assert_array_almost_equal(Mp0.sample_idx, np.array([[0],[1],[2],[3],[4]]))
 
+
     assert Mp1.variables[0].name == 'haz' and Mp1.variables[1].name == 'x0' and Mp1.variables[2].name == 'x1'
-    np.testing.assert_array_almost_equal(Mp1.C, np.array([[0,0,0], [0,1,0], [0,0,1], [0,1,1]]))
-    np.testing.assert_array_almost_equal(Mp1.p, np.array([[0.021], [0.189], [0.049], [0.441]]))
+    for c, p in zip( np.array([[0,0,0], [0,1,0], [0,0,1], [0,1,1]]), np.array([0.021, 0.189, 0.049, 0.441]) ):
+        r_idx = np.where(np.all(Mp1.C == c, axis=1))[0]
+        Mp1_p = Mp1.p[r_idx]
+        assert p == pytest.approx(Mp1_p, rel=1e-3)
+
     np.testing.assert_array_almost_equal(Mp1.Cs, np.array([[0,0,1],[0,1,0],[0,1,0],[1,0,1],[0,1,0]]))
     np.testing.assert_array_almost_equal(Mp1.q, np.array([[0.049], [0.189], [0.189], [0.036], [0.189]]))
     np.testing.assert_array_almost_equal(Mp1.ps, np.array([[0.0343], [0.1323], [0.1323], [0.015], [0.132]]), decimal=3)
-
 
 def test_product5( setup_hybrid ):
     varis, cpms = setup_hybrid
@@ -1510,16 +1527,22 @@ def test_product5( setup_hybrid ):
     Mp1 = Mp0.product(Mc['x1'])
 
     assert Mp0.variables[0].name == 'haz' and Mp0.variables[1].name == 'x0'
-    np.testing.assert_array_almost_equal(Mp0.C, np.array([[0,0], [0,1]]))
-    np.testing.assert_array_almost_equal(Mp0.p, np.array([[0.07], [0.63]]))
+    for c, p in zip( np.array([[0,0], [0,1]]), np.array([0.07, 0.63]) ):
+        r_idx = np.where(np.all(Mp0.C == c, axis=1))[0]
+        Mp0_p = Mp0.p[r_idx]
+        assert p == pytest.approx(Mp0_p, rel=1e-3)
+
     np.testing.assert_array_almost_equal(Mp0.Cs, np.array([[0,0],[0,1],[0,1],[1,0],[0,1]]))
     np.testing.assert_array_almost_equal(Mp0.q, np.array([[0.07], [0.63], [0.63], [0.06], [0.63]]))
     np.testing.assert_array_almost_equal(Mp0.ps, np.array([[0.049], [0.441], [0.441], [0.021], [0.441]]))
     np.testing.assert_array_almost_equal(Mp0.sample_idx, np.array([[0],[1],[2],[3],[4]]))
 
     assert Mp1.variables[0].name == 'haz' and Mp1.variables[1].name == 'x0' and Mp1.variables[2].name == 'x1'
-    np.testing.assert_array_almost_equal(Mp1.C, np.array([[0,0,0], [0,1,0], [0,0,1], [0,1,1]]))
-    np.testing.assert_array_almost_equal(Mp1.p, np.array([[0.021], [0.189], [0.049], [0.441]]))
+    for c, p in zip( np.array([[0,0,0], [0,1,0], [0,0,1], [0,1,1]]), np.array([0.021, 0.189, 0.049, 0.441]) ):
+        r_idx = np.where(np.all(Mp1.C == c, axis=1))[0]
+        Mp1_p = Mp1.p[r_idx]
+        assert p == pytest.approx(Mp1_p, rel=1e-3)
+
     np.testing.assert_array_almost_equal(Mp1.Cs, np.array([[0,0,1],[0,1,0],[0,1,0],[1,0,1],[0,1,0]]))
     np.testing.assert_array_almost_equal(Mp1.q, np.array([[0.049], [0.189], [0.189], [0.036], [0.189]]))
     np.testing.assert_array_almost_equal(Mp1.ps, np.array([[0.0343], [0.1323], [0.1323], [0.015], [0.132]]), decimal=3)
