@@ -733,13 +733,14 @@ class Cpm(object):
 
                     C1 = self.C[:, new_vars_idx1[k]]
                     Bst = np.tile(C1.T, (n_row2, 1, 1))
+                    Bst = np.squeeze(Bst)
 
                     Bst_dict[v.name] = Bst
 
                 else: # it is in M only
 
                     C2 = M.C[:, new_vars_idx2[k]]
-                    Bst = np.tile(C2, (1, n_row1, 1))
+                    Bst = np.repeat(C2.reshape(-1,1), n_row1, axis=1)
 
                     Bst_dict[v.name] = Bst
 
@@ -747,13 +748,10 @@ class Cpm(object):
             for v in new_vars:
                 Cnew_list.append( Bst_dict[v.name].T.reshape(-1) )
             Cnew = np.column_stack( Cnew_list )
-            #print(Cnew)
 
             pnew = np.repeat(self.p, n_row2) * np.tile(M.p, (n_row1, 1)).flatten()
-            #print(pnew)
 
             mask = np.sum( Cnew < 0, axis=1 ) < 1
-            #print(mask)
 
             Cnew = Cnew[mask]
             pnew = pnew[mask]
