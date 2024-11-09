@@ -260,24 +260,43 @@ class Branch(object):
 
 def save_brs_to_parquet(brs_list, file_path):
     """
-    Save a list of Branch objects to a .parquet file.
+    Save a list of Branch objects to a .parquet file with efficient handling
+    of nested dictionaries by flattening them into columns.
     
     Parameters:
     brs_list (list): A list of Branch objects.
     file_path (str): The full path to save the .parquet file.
+
+    Example usage (given that `branches` is a list of Branch objects):
+    save_branches_to_parquet(branches, 'output_file.parquet')
+
     """
-    # Convert Branch objects to a list of dictionaries
-    brs_dict = [br.to_dict() for br in brs_list]
-    
-    # Create a DataFrame from the list of dictionaries
-    df = pd.DataFrame(brs_dict)
-    
+    # Create a list to hold flattened data
+    data = []
+
+    # Iterate over the branches to create a flattened dictionary for each Branch
+    for br in brs_list:
+        # Flatten the 'down' and 'up' dictionaries by prefixing keys for uniqueness
+        flattened_data = {
+            **{f"down_{k}": v for k, v in br.down.items()},
+            **{f"up_{k}": v for k, v in br.up.items()},
+            "down_state": br.down_state,
+            "up_state": br.up_state,
+            "p": br.p
+        }
+        data.append(flattened_data)
+
+    # Convert the list of dictionaries to a DataFrame
+    df = pd.DataFrame(data)
+
     # Save the DataFrame as a .parquet file
     df.to_parquet(file_path, engine='pyarrow', index=False)
 
+
+
 def load_brs_from_parquet(file_path):
     """
-    Load a list of Branch objects from a .parquet file.
+    Load a list of Branch objects from a .parquet file with flattened 'down' and 'up' data.
     
     Parameters:
     file_path (str): The path to the .parquet file.
@@ -287,19 +306,24 @@ def load_brs_from_parquet(file_path):
     """
     # Read the DataFrame from the .parquet file
     df = pd.read_parquet(file_path, engine='pyarrow')
-    
+
     # Reconstruct the list of Branch objects
-    brs_list = [
-        Branch(
-            down=row['down'],
-            up=row['up'],
+    brs_list = []
+    for _, row in df.iterrows():
+        # Reconstruct 'down' and 'up' dictionaries by filtering columns with appropriate prefixes
+        down = {key.replace('down_', ''): row[key] for key in row.index if key.startswith('down_')}
+        up = {key.replace('up_', ''): row[key] for key in row.index if key.startswith('up_')}
+
+        # Create a Branch object with reconstructed dictionaries
+        branch = Branch(
+            down=down,
+            up=up,
             down_state=row.get('down_state'),
             up_state=row.get('up_state'),
             p=row.get('p')
         )
-        for _, row in df.iterrows()
-    ]
-    
+        brs_list.append(branch)
+
     return brs_list
 
 
