@@ -11,6 +11,8 @@ import itertools
 from pathlib import Path
 from collections import namedtuple
 from scipy.stats import beta
+import pandas as pd
+import pyarrow
 #import dask
 #from dask.distributed import Client, worker_client, as_completed, get_client
 
@@ -256,6 +258,49 @@ class Branch(object):
     def from_dict(data):
         return Branch( down = data['down'], up = data['up'], down_state = data['down_state'], up_state = data['up_state'], p = data['p'] )
 
+def save_brs_to_parquet(brs_list, file_path):
+    """
+    Save a list of Branch objects to a .parquet file.
+    
+    Parameters:
+    brs_list (list): A list of Branch objects.
+    file_path (str): The full path to save the .parquet file.
+    """
+    # Convert Branch objects to a list of dictionaries
+    brs_dict = [br.to_dict() for br in brs_list]
+    
+    # Create a DataFrame from the list of dictionaries
+    df = pd.DataFrame(brs_dict)
+    
+    # Save the DataFrame as a .parquet file
+    df.to_parquet(file_path, engine='pyarrow', index=False)
+
+def load_brs_from_parquet(file_path):
+    """
+    Load a list of Branch objects from a .parquet file.
+    
+    Parameters:
+    file_path (str): The path to the .parquet file.
+    
+    Returns:
+    list: A list of Branch objects.
+    """
+    # Read the DataFrame from the .parquet file
+    df = pd.read_parquet(file_path, engine='pyarrow')
+    
+    # Reconstruct the list of Branch objects
+    brs_list = [
+        Branch(
+            down=row['down'],
+            up=row['up'],
+            down_state=row.get('down_state'),
+            up_state=row.get('up_state'),
+            p=row.get('p')
+        )
+        for _, row in df.iterrows()
+    ]
+    
+    return brs_list
 
 
 class Branch_old(object):
