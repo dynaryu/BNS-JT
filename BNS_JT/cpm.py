@@ -9,29 +9,27 @@ from BNS_JT import utils
 
 
 class Cpm(object):
-    """
-    Defines the conditional probability matrix (cf., CPT)
+    '''Defines the conditional probability matrix (CPM).
+    CPM plays the same role as CPT in conventional Bayesian networks.
+    Ref: Byun et al. (2019). Matrix-based Bayesian Network for
+    efficient memory storage and flexible inference. 
+    Reliability Engineering & System Safety, 185, 533-545.
 
-    Parameters
-    ----------
-    variables: list
-        list of instances of Variable
-    no_child: int
-        number of child nodes
-    C: array_like
-        event matrix (referencing row of Variable)
-    p: array_like
-        probability vector (n x 1)
-    q: array_like
-        sampling weight vector for continuous r.v. (n x 1)
-    sample_idx: array_like
-        sample index vector (n x 1)
+    Attributes:
+        variables (list): list of instances of Variable objects.
+        no_child (int): number of child nodes.
+        C (array_like): event matrix.
+        p (array_like): probability vector related to C.
+        Cs (array_like): event matrix of samples.
+        q (array_like): sampling probability vector related to Cs.
+        sample_idx (array_like): sample index vector related to Cs.
+        ps (array_like): probability vector of samples.
+        Sample weights are calculated as ps/q.
 
-    Examples
-    --------
-
-    Cpm(varibles, no_child, C, p, q, sample_idx)
-    """
+    Notes:
+        C and p have the same number of rows.
+        Cs, q, sample_idx, and ps have the same number of rows.
+    '''
 
     def __init__(self, variables, no_child, C=[], p=[], Cs=[], q=[], ps=[], sample_idx=[]):
 
