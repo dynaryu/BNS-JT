@@ -48,7 +48,8 @@ def main(key: Annotated[str, typer.Argument()] = 'od2',
     varis = {}
     cpms = {}
     for k, v in cfg.infra['edges'].items():
-        varis[k] = variable.Variable(name=k, values = cfg.scenarios['scenarios']['s1'][k])
+        #varis[k] = variable.Variable(name=k, values = cfg.scenarios['scenarios']['s1'][k])
+        varis[k] = variable.Variable(name=k, values = [np.inf, 2.0*v['weight'], 1.0*v['weight']])
         cpms[k] = cpm.Cpm(variables = [varis[k]], no_child=1,
                           C = np.array([0, 1, 2]).T, p = [probs[k][0], probs[k][1], probs[k][2]])
 
