@@ -7,14 +7,122 @@ import pdb
 import pickle
 import numpy as np
 import typer
+from scipy import stats
 from typing_extensions import Annotated
 
 from BNS_JT import model, config, trans, variable, brc, branch, cpm, operation
 
+app = typer.Typer()
 
 HOME = Path(__file__).parent
 
-app = typer.Typer()
+DAMAGE_STATES = ['Slight', 'Moderate', 'Extensive', 'Complete']
+
+KEYS = ['LATITUDE', 'LONGITUDE', 'HAZUS_CLASS', 'K3d', 'Kskew', 'Ishape']
+
+
+def get_kshape(Ishape, sa03, sa10):
+    """
+    sa03, sa10 can be vector
+    """
+    if isinstance(sa03, float):
+        if Ishape:
+            Kshape = np.min([1.0, 2.5*sa10/sa03])
+        else:
+            Kshape  = 1.0
+    else:
+        if Ishape:
+            Kshape = np.minimum(1.0, 2.5*sa10/sa03)
+        else:
+            Kshape  = np.ones_like(sa03)
+    return Kshape
+
+
+def compute_pe_by_ds(ps, kshape, Kskew, k3d, sa10):
+
+    factor = {'Slight': kshape,
+              'Moderate': Kskew*k3d,
+              'Extensive': Kskew*k3d,
+              'Complete': Kskew*k3d}
+
+    return pd.Series({ds: stats.lognorm.cdf(sa10, 0.6, scale=factor[ds]*ps[ds])
+            for ds in DAMAGE_STATES})
+
+
+@app.command()
+def dmg_bridge(file_bridge: str, file_gm: str):
+
+    # HAZUS Methodology
+    bridge_param = pd.read_csv(
+        HOME.joinpath('bridge_classification_damage_params.csv'), index_col=0)
+
+    # read sitedb data 
+    df_bridge = pd.read_csv(file_bridge, index_col=0)[KEYS].copy()
+
+    # read gm
+    gm = pd.read_csv(file_gm, index_col=0, skiprows=1)
+
+    # weighted
+    tmp = []
+    for i, row in df_bridge.iterrows():
+        _df = (gm['lat']-row['LATITUDE'])**2 + (gm['lon']-row['LONGITUDE'])**2
+        idx = _df.idxmin()
+
+        if _df.loc[idx] < 0.01:
+            row['SA03'] = gm.loc[idx, 'gmv_SA(0.3)']
+            row['SA10'] = gm.loc[idx, 'gmv_SA(1.0)']
+            row['Kshape'] = get_kshape(row['Ishape'], row['SA03'], row['SA10'])
+
+            df_pe = compute_pe_by_ds(
+                bridge_param.loc[row['HAZUS_CLASS']], row['Kshape'], row['Kskew'], row['K3d'], row['SA10'])
+
+            #df_pb = get_pb_from_pe(df_pe)
+            #df_pe['Kshape'] = row['Kshape']
+            #df_pe['SA10'] = row['SA10']
+
+            tmp.append(df_pe)
+
+        else:
+            print('Something wrong {}:{}'.format(i, _df.loc[idx]))
+
+    tmp = pd.DataFrame(tmp)
+    tmp.index = df_bridge.index
+    #df_bridge = pd.concat([df_bridge, tmp], axis=1)
+
+    # convert to edge prob
+    dmg = convert_dmg(tmp)
+
+    dir_path = Path(file_gm).parent
+    file_output = dir_path.joinpath(Path(file_gm).stem + '_dmg.csv')
+    dmg.to_csv(file_output)
+    print(f'{file_output} saved')
+
+    return dmg
+
+
+def convert_dmg(dmg):
+
+    cfg = config.Config(HOME.joinpath('./config.json'))
+
+    tmp = {}
+    for k, v in cfg.infra['edges'].items():
+
+        try:
+            p0 = 1 - dmg.loc[v['origin']]['Extensive']
+        except KeyError:
+            p0 = 1.0
+
+        try:
+            p1 = 1 - dmg.loc[v['destination']]['Extensive']
+        except KeyError:
+            p0 = 1.0
+        finally:
+            tmp[k] = {'F': 1 - p0 * p1}
+
+    tmp = pd.DataFrame(tmp).T
+    tmp['S'] = 1 - tmp['F']
+
+    return tmp
 
 
 @app.command()
@@ -25,15 +133,10 @@ def plot():
     trans.plot_graph(cfg.infra['G'], HOME.joinpath('wheat.png'))
 
 
-@app.command()
-def main(key: Annotated[str, typer.Argument()] = 'od1',
-         max_sf: Annotated[int, typer.Argument()] = 100):
+def generate_default():
 
     rnd_state = np.random.RandomState(1)
-    thres = 5 # if it takes longer than this, we consider the od pair is disconnected
     cfg = config.Config(HOME.joinpath('./config.json'))
-
-    od_pair = cfg.infra['ODs'][key]
 
     # randomly assign probabilities
     ## Here we assume binary states for each edge, assuming that 
@@ -47,13 +150,31 @@ def main(key: Annotated[str, typer.Argument()] = 'od1',
 
     probs = {k: probs_set[v] for k, v in zip(cfg.infra['edges'].keys(), probs_key)}
 
+    pd.DataFrame(probs).T.to_csv(HOME.joinpath('random.csv'))
+
+
+@app.command()
+def main(file_dmg: str,
+         key: Annotated[str, typer.Argument()] = 'od1'):
+
+    rnd_state = np.random.RandomState(1)
+    thres = 5 # if it takes longer than this, we consider the od pair is disconnected
+    cfg = config.Config(HOME.joinpath('./config.json'))
+
+    od_pair = cfg.infra['ODs'][key]
+
+    # randomly assign probabilities
+    probs = pd.read_csv(file_dmg, index_col=0)
+    probs.index = probs.index.astype('str')
+    probs = probs.to_dict('index')
+
     # variables
     varis = {}
     cpms = {}
     for k, v in cfg.infra['edges'].items():
         varis[k] = variable.Variable(name=k, values = [np.inf, 1.0*v['weight']])
         cpms[k] = cpm.Cpm(variables = [varis[k]], no_child=1,
-                            C = np.array([0, 1]).T, p = [probs[k][0], probs[k][1]])
+                            C = np.array([0, 1]).T, p = [probs[k]['F'], probs[k]['S']])
 
     # Intact state of component vector: zero-based index
     comps_st_itc = {k: len(v.values) - 1 for k, v in varis.items()}
@@ -127,16 +248,19 @@ def main(key: Annotated[str, typer.Argument()] = 'od1',
             'probs': probs,
             'path_names': path_names}
 
-    with open(cfg.output_path.joinpath('dump.pk'), 'wb') as f:
+    dir_path = Path(file_dmg).parent
+    file_output = dir_path.joinpath(Path(file_dmg).stem + '_dump.pk')
+    with open(file_output, 'wb') as f:
         pickle.dump(dump, f)
+    print(f'{file_output} saved')
 
 
 @app.command()
-def inference():
+def inference(file_dump):
 
     cfg = config.Config(HOME.joinpath('./config.json'))
 
-    with open(cfg.output_path.joinpath('dump.pk'), 'rb') as f:
+    with open(file_dump, 'rb') as f:
         dump = pickle.load(f)
         cpms = dump['cpms']
         varis = dump['varis']
@@ -157,7 +281,9 @@ def inference():
 
     plt.xlabel("Travel time")
     plt.ylabel("Probability")
-    plt.savefig(cfg.output_path.joinpath('travel_time.png'), dpi=100)
+    dir_path = Path(file_dump).parent
+    file_output = dir_path.joinpath(Path(file_dump).stem + '_travel.png')
+    plt.savefig(file_output, dpi=100)
 
     #st_br_to_cs = {'f': 0, 's': 1, 'u': 2}
     #csys_by_od, varis_by_od = {}, {}
@@ -165,11 +291,11 @@ def inference():
     #for k, od_pair in cfg.infra['ODs'].items():
 
 @app.command()
-def route():
+def route(file_dump):
 
     cfg = config.Config(HOME.joinpath('./config.json'))
 
-    with open(cfg.output_path.joinpath('dump.pk'), 'rb') as f:
+    with open(file_dump, 'rb') as f:
         dump = pickle.load(f)
         cpms = dump['cpms']
         varis = dump['varis']
@@ -194,7 +320,9 @@ def route():
 
     plt.xlabel(f"Route: {od_name}")
     plt.ylabel("Reliability")
-    plt.savefig(cfg.output_path.joinpath('route.png'), dpi=100)
+    dir_path = Path(file_dump).parent
+    file_output = dir_path.joinpath(Path(file_dump).stem + '_route.png')
+    plt.savefig(file_output, dpi=100)
 
 
 if __name__=='__main__':
