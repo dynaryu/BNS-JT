@@ -154,6 +154,101 @@ def generate_default():
 
 
 @app.command()
+def setup_model(key: Annotated[str, typer.Argument()] = 'od1'):
+
+    thres = 5 # if it takes longer than this, we consider the od pair is disconnected
+    cfg = config.Config(HOME.joinpath('./config.json'))
+
+    od_pair = cfg.infra['ODs'][key]
+
+    # variables
+    varis = {}
+    cpms = {}
+    for k, v in cfg.infra['edges'].items():
+        varis[k] = variable.Variable(name=k, values = [np.inf, 1.0*v['weight']])
+        #cpms[k] = cpm.Cpm(variables = [varis[k]], no_child=1,
+        #                    C = np.array([0, 1]).T, p = [probs[k]['F'], probs[k]['S']])
+
+    # Intact state of component vector: zero-based index
+    comps_st_itc = {k: len(v.values) - 1 for k, v in varis.items()}
+    d_time_itc, _, path_itc = trans.get_time_and_path_given_comps(comps_st_itc, cfg.infra['G'], od_pair, varis)
+
+    G = cfg.infra['G']
+    all_paths = nx.all_simple_paths(G, od_pair[0], od_pair[1])
+
+    valid_paths = []
+
+    for path in all_paths:
+        # Calculate the total weight of the path
+        path_edges = [(u, v) for u, v in zip(path[:-1], path[1:])]
+        path_weight = sum(G[u][v]['weight'] for u, v in path_edges)
+        if path_weight < thres * d_time_itc:
+            # Collect the edge names if they exist, otherwise just use the edge tuple
+            edge_names = [G[u][v].get('key', (u, v)) for u, v in path_edges]
+            valid_paths.append((path, edge_names, path_weight))
+
+    # Sort valid paths by weight
+    valid_paths = sorted(valid_paths, key=lambda x: x[2])
+
+    # Print the paths with edge names and weights
+    '''
+    for path, edge_names, weight in valid_paths:
+        print(f"Path (nodes): {path}")
+        print(f"Path (edges): {edge_names}")
+        print(f"Total weight: {weight}\n")
+    '''
+
+    path_names = []
+    for idx, (path, edge_names, weight) in enumerate(valid_paths):
+        name = '_'.join((*od_pair, str(idx)))
+        path_names.append(name)
+
+        varis[name] = variable.Variable(name=name, values = [np.inf, weight])
+
+        n_edge = len(edge_names)
+
+        # Event matrix of series system
+        # Initialize an array of shape (n+1, n+1) filled with 1
+        Cpath = np.ones((n_edge + 1, n_edge + 1), dtype=int)
+        for i in range(1, n_edge + 1):
+            Cpath[i, 0] = 0
+            Cpath[i, i] = 0 # Fill the diagonal below the main diagonal with 0
+            Cpath[i, i + 1:] = 2 # Fill the lower triangular part (excluding the diagonal) with 2
+
+        #for i in range(1, n_edge + 1):
+        ppath = np.array([1.0]*(n_edge + 1))
+        cpms[name] = cpm.Cpm(variables = [varis[name]] + [varis[e] for e in edge_names], no_child=1, C=Cpath, p=ppath)
+
+    od_name = '_'.join(od_pair)
+    vals = [np.inf]
+    for p in path_names[::-1]:
+        vals.append(varis[p].values[1])
+
+    n_path = len(path_names)
+    Csys = np.zeros((n_path+1, n_path+1), dtype=int)
+    for i in range(n_path):
+        Csys[i, 0] = n_path - i
+        Csys[i, i + 1] = 1
+        Csys[i, i + 2:] = 2
+    psys = np.array([1.0]*(n_path+1))
+
+    varis[od_name] = variable.Variable(name=od_name, values = vals)
+    cpms[od_name] = cpm.Cpm(variables = [varis[od_name]] + [varis[p] for p in path_names], no_child=1, C=Csys, p=psys)
+
+    # save 
+    dump = {'cpms': cpms,
+            'varis': varis,
+            #'probs': probs,
+            'path_names': path_names}
+
+    #dir_path = Path(file_dmg).parent
+    file_output = HOME.joinpath('model.pk')
+    with open(file_output, 'wb') as f:
+        pickle.dump(dump, f)
+    print(f'{file_output} saved')
+
+
+@app.command()
 def main(file_dmg: str,
          key: Annotated[str, typer.Argument()] = 'od1'):
 
@@ -198,14 +293,16 @@ def main(file_dmg: str,
     valid_paths = sorted(valid_paths, key=lambda x: x[2])
 
     # Print the paths with edge names and weights
+    '''
     for path, edge_names, weight in valid_paths:
         print(f"Path (nodes): {path}")
         print(f"Path (edges): {edge_names}")
         print(f"Total weight: {weight}\n")
+    '''
 
     path_names = []
     for idx, (path, edge_names, weight) in enumerate(valid_paths):
-        name = od_pair[0] + '_' + od_pair[1] + '_' + str(idx)
+        name = '_'.join((*od_pair, str(idx)))
         path_names.append(name)
 
         varis[name] = variable.Variable(name=name, values = [np.inf, weight])
@@ -214,16 +311,14 @@ def main(file_dmg: str,
 
         # Event matrix of series system
         # Initialize an array of shape (n+1, n+1) filled with 1
-        Cpath = np.ones((n_edge + 1, n_edge+1), dtype=int)
-        # Fill the diagonal below the main diagonal with 0
+        Cpath = np.ones((n_edge + 1, n_edge + 1), dtype=int)
         for i in range(1, n_edge + 1):
             Cpath[i, 0] = 0
-            Cpath[i, i] = 0
-        # Fill the lower triangular part (excluding the diagonal) with 2
-        for i in range(1, n_edge + 1):
-            Cpath[i, i+1:] = 2
-        ppath = np.array([1.0]*(n_edge+1))
+            Cpath[i, i] = 0 # Fill the diagonal below the main diagonal with 0
+            Cpath[i, i + 1:] = 2 # Fill the lower triangular part (excluding the diagonal) with 2
 
+        #for i in range(1, n_edge + 1):
+        ppath = np.array([1.0]*(n_edge + 1))
         cpms[name] = cpm.Cpm(variables = [varis[name]] + [varis[e] for e in edge_names], no_child=1, C=Cpath, p=ppath)
 
     od_name = '_'.join(od_pair)
@@ -235,8 +330,8 @@ def main(file_dmg: str,
     Csys = np.zeros((n_path+1, n_path+1), dtype=int)
     for i in range(n_path):
         Csys[i, 0] = n_path - i
-        Csys[i, i+1] = 1
-        Csys[i, i+2:] = 2
+        Csys[i, i + 1] = 1
+        Csys[i, i + 2:] = 2
     psys = np.array([1.0]*(n_path+1))
 
     varis[od_name] = variable.Variable(name=od_name, values = vals)
@@ -256,16 +351,26 @@ def main(file_dmg: str,
 
 
 @app.command()
-def inference(file_dump):
+def inference(file_dmg):
 
     cfg = config.Config(HOME.joinpath('./config.json'))
 
-    with open(file_dump, 'rb') as f:
+    with open(HOME.joinpath('model.pk'), 'rb') as f:
         dump = pickle.load(f)
         cpms = dump['cpms']
         varis = dump['varis']
-        probs = dump['probs']
+        #probs = dump['probs']
         path_names = dump['path_names']
+
+    # assign cpms given scenario
+    probs = pd.read_csv(file_dmg, index_col=0)
+    probs.index = probs.index.astype('str')
+    probs = probs.to_dict('index')
+
+    for k, v in cfg.infra['edges'].items():
+        #varis[k] = variable.Variable(name=k, values = [np.inf, 1.0*v['weight']])
+        cpms[k] = cpm.Cpm(variables = [varis[k]], no_child=1,
+                            C = np.array([0, 1]).T, p = [probs[k]['F'], probs[k]['S']])
 
     od_pair = cfg.infra['ODs']['od1']
     od_name = '_'.join(od_pair)
@@ -281,8 +386,8 @@ def inference(file_dump):
 
     plt.xlabel("Travel time")
     plt.ylabel("Probability")
-    dir_path = Path(file_dump).parent
-    file_output = dir_path.joinpath(Path(file_dump).stem + '_travel.png')
+    dir_path = Path(file_dmg).parent
+    file_output = dir_path.joinpath(Path(file_dmg).stem + '_travel.png')
     plt.savefig(file_output, dpi=100)
 
     #st_br_to_cs = {'f': 0, 's': 1, 'u': 2}
@@ -291,16 +396,26 @@ def inference(file_dump):
     #for k, od_pair in cfg.infra['ODs'].items():
 
 @app.command()
-def route(file_dump):
+def route(file_dmg):
 
     cfg = config.Config(HOME.joinpath('./config.json'))
 
-    with open(file_dump, 'rb') as f:
+    with open(HOME.joinpath('model.pk'), 'rb') as f:
         dump = pickle.load(f)
         cpms = dump['cpms']
         varis = dump['varis']
-        probs = dump['probs']
+        #probs = dump['probs']
         path_names = dump['path_names']
+
+    # assign cpms given scenario
+    probs = pd.read_csv(file_dmg, index_col=0)
+    probs.index = probs.index.astype('str')
+    probs = probs.to_dict('index')
+
+    for k, v in cfg.infra['edges'].items():
+        #varis[k] = variable.Variable(name=k, values = [np.inf, 1.0*v['weight']])
+        cpms[k] = cpm.Cpm(variables = [varis[k]], no_child=1,
+                            C = np.array([0, 1]).T, p = [probs[k]['F'], probs[k]['S']])
 
     od_pair = cfg.infra['ODs']['od1']
     od_name = '_'.join(od_pair)
@@ -310,7 +425,7 @@ def route(file_dump):
     paths_rel = []
     for path_i in paths_name:
         VE_ord = list(probs.keys()) + path_names
-        vars_inf = operation.get_inf_vars( cpms, path_i, VE_ord )
+        vars_inf = operation.get_inf_vars(cpms, path_i, VE_ord)
 
         Mpath = operation.variable_elim([cpms[k] for k in vars_inf], [v for v in vars_inf if v!=path_i])
         paths_rel.append( Mpath.p[1][0] )
@@ -320,8 +435,8 @@ def route(file_dump):
 
     plt.xlabel(f"Route: {od_name}")
     plt.ylabel("Reliability")
-    dir_path = Path(file_dump).parent
-    file_output = dir_path.joinpath(Path(file_dump).stem + '_route.png')
+    dir_path = Path(file_dmg).parent
+    file_output = dir_path.joinpath(Path(file_dmg).stem + '_route.png')
     plt.savefig(file_output, dpi=100)
 
 
