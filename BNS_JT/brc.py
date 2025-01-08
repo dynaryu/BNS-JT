@@ -14,7 +14,7 @@ import time
 from BNS_JT import variable, branch
 
 
-def run(varis, probs, sys_fun, max_sf, max_nb, pf_bnd_wr=0.0, max_rules = np.inf, surv_first=True, rules=None, brs = None, display_freq = 200, active_decomp = False):
+def run(varis, probs, sys_fun, max_sf = np.inf, max_nb = np.inf, pf_bnd_wr=0.0, max_rules = np.inf, surv_first=True, rules=None, brs = None, display_freq = 200, active_decomp = False, final_decomp = True):
 
     """
     INPUTS:
@@ -88,6 +88,11 @@ def run(varis, probs, sys_fun, max_sf, max_nb, pf_bnd_wr=0.0, max_rules = np.inf
             monitor['out_flag'] = 'max_sf'
 
     try:
+        if final_decomp and not active_decomp:
+            nbr_old = len(brs)
+            brs, _ = decomp_depth_first(varis, rules, probs, max_nb)
+            print(f"*Final decomposition is completed with {len(brs)} branches (originally {nbr_old} branches).")
+
         monitor, ctrl = update_monitor(monitor, brs, rules, start)
 
         print(f"*** Analysis completed with f_sys runs {ctrl['no_sf']}: out_flag = {monitor['out_flag']} ***")
@@ -95,6 +100,7 @@ def run(varis, probs, sys_fun, max_sf, max_nb, pf_bnd_wr=0.0, max_rules = np.inf
 
     except NameError: # analysis is terminated before the first system function run
         print(f'***Analysis terminated without any evaluation***')
+
 
     return brs, rules, sys_res, monitor
 
@@ -195,6 +201,7 @@ def display_msg(monitor):
     print(f"The # of found non-dominated rules (f, s): {last['no_ra']} ({last['no_rf']}, {last['no_rs']})")
     print(f"Probability of branchs (f, s, u): ({last['pf_low']:.4e}, {1-last['pf_up']:.2e}, {last['pr_bu']:.4e})")
     print(f"The # of branches (f, s, u), (min, avg) len of rf: {last['no_br']} ({last['no_bf']}, {last['no_bs']}, {last['no_bu']}), ({last['min_len_rf']}, {last['avg_len_rf']:.2f})")
+    print(f"Elapsed seconds (average per round): {sum(monitor['time']):1.2e} ({np.mean(monitor['time']):1.2e})")
 
 
 def plot_monitoring(monitor, output_file='monitor.png'):
