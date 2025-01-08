@@ -14,21 +14,47 @@ import time
 from BNS_JT import variable, branch
 
 
-def run(varis, probs, sys_fun, max_sf, max_nb, pf_bnd_wr=0.0, max_rules = np.inf, surv_first=True, rules=None, brs = None, display_freq = 200, active_decomp = True):
+def run(varis, probs, sys_fun, rules=None, brs = None, max_sf = np.inf, max_nb = np.inf, pf_bnd_wr=0.0, max_rules = np.inf, surv_first=True, active_decomp = False, final_decomp = True, display_freq = 200):
 
     """
-    INPUTS:
-    varis: a dictionary of variable#s
-    probs: a dictionary of probabilities
-    sys_fun: a system function
-    **Iteration termination conditions**
-    max_sf: maximum number of system function runs
-    max_nb: maximum number of branches
-    pf_bnd_wr: bound of system failure probability in ratio (width / lower bound)
-    max_rules: the max number of rules
-    surv_first: True if survival branches are considered first
-    ************************************
-    rules: provided if there are some known rules
+    Run the BRC algorithm to find (1) non-dominated rules and
+    (2) branches for system reliability analysis.
+
+    Attributes:
+        varis (dictionary): {comp_name (str): (variable.Variable)}
+        probs (dictionaty): {comp_name (str): probabilities (list)}
+        sys_fun: a system function
+            One attribute:
+                comp_state (dictionary): {comp_name (str): state (int)}
+            Returns (orders need to be kept):
+                system value (any type)
+                system state ('s' or 'f')
+                minimum rule for system state (dictionary):
+                    {comp_name (str): state (int)}
+
+        **Information from previous analysis (optional when available)**
+            rules (dictionary): {'s': list of rules, 'f': list of rules}
+            brs (list): branches from previous analysis
+
+        **Iteration termination conditions**
+            max_sf (int): maximum number of system function runs
+            max_nb (int): maximum number of branches
+            pf_bnd_wr (float, non-negative): bound of system failure probability
+                in ratio (width / lower bound)
+            max_rules (int): the maximum number of rules
+        **Decomposition options**
+            surv_first: True if survival branches are considered first
+            active_decomp: True if branches are re-obtained at each iteration
+            final_decomp: True if final decomposition is performed
+                (only when active_decomp = False)
+        **Display options**
+            display_freq (int): frequency of displaying the current progress
+
+    Returns:
+        brs (list): branches
+        rules (dictionary): {'s': list of rules, 'f': list of rules}
+        sys_res (pandas.DataFrame): system function results
+        monitor (dictionary): monitoring information
     """
 
     if not rules:
@@ -51,27 +77,6 @@ def run(varis, probs, sys_fun, max_sf, max_nb, pf_bnd_wr=0.0, max_rules = np.inf
             if brs is None:
                 brs = []
             brs, _ = decomp_depth_first(varis, rules, probs, max_nb, brs) # existing branches are not reassessed.
-            
-            # Give up below (where I tried to update the dcomposition result when the components importance becomes quite different from the beginning) as the two lists always become different
-            """if brs is None:
-                brs = []
-                comps_freq = {x: 0 for x in probs.keys()} # decomposition order (roughly by their frequencies)
-                comps_ord = sorted( comps_freq, key=comps_freq.get )
-
-            # As a proxy of components' importance, we count the number.
-            comps_ord_old = copy.deepcopy( comps_ord )
-            comps_freq = {x: 0 for x in probs.keys()}
-            for r in rules['s'] + rules['f']:
-                for x in probs.keys():
-                    if x in r.keys():
-                        comps_freq[x] += 1
-            comps_ord = sorted( comps_freq, key=comps_freq.get )
-            
-            comps_ord_dist = editdistance.eval(comps_ord, comps_ord_old)
-            if comps_ord_dist < int(0.05*len(probs)):
-                brs, _ = decomp_depth_first(varis, rules, probs, max_nb, brs) # use previous brs
-            else:
-                brs, _ = decomp_depth_first(varis, rules, probs, max_nb, brs=[])"""
 
         x_star = get_comp_st(brs, surv_first, varis, probs)  # S4-1
 
@@ -108,20 +113,21 @@ def run(varis, probs, sys_fun, max_sf, max_nb, pf_bnd_wr=0.0, max_rules = np.inf
         if ctrl['no_sf'] == max_sf:
             monitor['out_flag'] = 'max_sf'
 
-    # NOTSURE???
-    #brs, _ = decomp_depth_first(varis, rules, probs, max_nb)
-
     try:
+        if final_decomp and not active_decomp:
+            nbr_old = len(brs)
+            brs, _ = decomp_depth_first(varis, rules, probs, max_nb)
+            print(f"\n*Final decomposition is completed with {len(brs)} branches (originally {nbr_old} branches).")
+
         monitor, ctrl = update_monitor(monitor, brs, rules, start)
 
-        print(f"*** Analysis completed with f_sys runs {ctrl['no_sf']}: out_flag = {monitor['out_flag']} ***")
+        print(f"\n***Analysis completed with f_sys runs {ctrl['no_sf']}: out_flag = {monitor['out_flag']}***")
         display_msg(monitor)
 
     except NameError: # analysis is terminated before the first system function run
-        print(f'***Analysis terminated without any evaluation***')
+        print(f'\n***Analysis terminated without any evaluation***')
 
     return brs, rules, sys_res, monitor
-
 
 
 def init_monitor():
@@ -219,6 +225,7 @@ def display_msg(monitor):
     print(f"The # of found non-dominated rules (f, s): {last['no_ra']} ({last['no_rf']}, {last['no_rs']})")
     print(f"Probability of branchs (f, s, u): ({last['pf_low']:.4e}, {1-last['pf_up']:.2e}, {last['pr_bu']:.4e})")
     print(f"The # of branches (f, s, u), (min, avg) len of rf: {last['no_br']} ({last['no_bf']}, {last['no_bs']}, {last['no_bu']}), ({last['min_len_rf']}, {last['avg_len_rf']:.2f})")
+    print(f"Elapsed seconds (average per round): {sum(monitor['time']):1.2e} ({np.mean(monitor['time']):1.2e})")
 
 
 def plot_monitoring(monitor, output_file='monitor.png'):
