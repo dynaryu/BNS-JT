@@ -232,12 +232,12 @@ Below, we set pf_bnd_wr = 0.0, indicating that the algorithm stops when the boun
 In other words, the analysis aims for a complete (not approximate) analysis.
 
 We set the other stopping criteria as max_sf=np.inf and max_nb=np.inf. <br>
-The variables indicate the maximum number of system function runs and that of created branches <br>
+The variables indicate the maximum number of system function runs and that of created branches. <br>
 Aiming for a complete analysis, we set both values to infinity. 
 
 
 ```python
-brs, rules, sys_res, monitor = brc.run(varis, probs, sys_fun, max_sf=np.inf, max_nb=np.inf, pf_bnd_wr=0.0)
+brs, rules, sys_res, monitor = brc.run(probs, sys_fun, max_sf=np.inf, max_nb=np.inf, pf_bnd_wr=0.0)
 ```
 
     *** Analysis completed with f_sys runs 8: out_flag = complete ***
