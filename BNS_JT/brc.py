@@ -14,7 +14,7 @@ import time
 from BNS_JT import variable, branch
 
 
-def run(varis, probs, sys_fun, max_sf, max_nb, pf_bnd_wr=0.0, max_rules = np.inf, surv_first=True, rules=None, brs = None, display_freq = 200, active_decomp = True):
+def run(varis, probs, sys_fun, max_sf, max_nb, pf_bnd_wr=0.0, max_rules = np.inf, surv_first=True, rules=None, brs = None, display_freq = 200, active_decomp = False):
 
     """
     INPUTS:
@@ -51,27 +51,6 @@ def run(varis, probs, sys_fun, max_sf, max_nb, pf_bnd_wr=0.0, max_rules = np.inf
             if brs is None:
                 brs = []
             brs, _ = decomp_depth_first(varis, rules, probs, max_nb, brs) # existing branches are not reassessed.
-            
-            # Give up below (where I tried to update the dcomposition result when the components importance becomes quite different from the beginning) as the two lists always become different
-            """if brs is None:
-                brs = []
-                comps_freq = {x: 0 for x in probs.keys()} # decomposition order (roughly by their frequencies)
-                comps_ord = sorted( comps_freq, key=comps_freq.get )
-
-            # As a proxy of components' importance, we count the number.
-            comps_ord_old = copy.deepcopy( comps_ord )
-            comps_freq = {x: 0 for x in probs.keys()}
-            for r in rules['s'] + rules['f']:
-                for x in probs.keys():
-                    if x in r.keys():
-                        comps_freq[x] += 1
-            comps_ord = sorted( comps_freq, key=comps_freq.get )
-            
-            comps_ord_dist = editdistance.eval(comps_ord, comps_ord_old)
-            if comps_ord_dist < int(0.05*len(probs)):
-                brs, _ = decomp_depth_first(varis, rules, probs, max_nb, brs) # use previous brs
-            else:
-                brs, _ = decomp_depth_first(varis, rules, probs, max_nb, brs=[])"""
 
         x_star = get_comp_st(brs, surv_first, varis, probs)  # S4-1
 
@@ -107,9 +86,6 @@ def run(varis, probs, sys_fun, max_sf, max_nb, pf_bnd_wr=0.0, max_rules = np.inf
 
         if ctrl['no_sf'] == max_sf:
             monitor['out_flag'] = 'max_sf'
-
-    # NOTSURE???
-    #brs, _ = decomp_depth_first(varis, rules, probs, max_nb)
 
     try:
         monitor, ctrl = update_monitor(monitor, brs, rules, start)
