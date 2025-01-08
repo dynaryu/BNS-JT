@@ -373,7 +373,7 @@ def run_sys_fn(comp, sys_fun, probs):
         if sys_st == 's':
             rule = {k: v for k, v in comp.items() if v}, sys_st # the rule is the same as up_dict but includes only components whose state is greater than the worst one (i.e. 0)
         else:
-            rule = {k: v for k, v in comp.items() if v < len(probs[k].values) - 1}, sys_st # the rule is the same as up_dict but includes only components whose state is less than the best one
+            rule = {k: v for k, v in comp.items() if v < len(probs[k].keys()) - 1}, sys_st # the rule is the same as up_dict but includes only components whose state is less than the best one
 
     return rule, sys_res
 
