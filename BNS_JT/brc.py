@@ -14,14 +14,13 @@ import time
 from BNS_JT import variable, branch
 
 
-def run(varis, probs, sys_fun, rules=None, brs = None, max_sf = np.inf, max_nb = np.inf, pf_bnd_wr=0.0, max_rules = np.inf, surv_first=True, active_decomp = False, final_decomp = True, display_freq = 200):
+def run(probs, sys_fun, rules=None, brs = None, max_sf = np.inf, max_nb = np.inf, pf_bnd_wr=0.0, max_rules = np.inf, surv_first=True, active_decomp = False, final_decomp = True, display_freq = 200):
 
     """
     Run the BRC algorithm to find (1) non-dominated rules and
     (2) branches for system reliability analysis.
 
     Attributes:
-        varis (dictionary): {comp_name (str): (variable.Variable)}
         probs (dictionaty): {comp_name (str): probabilities (list)}
         sys_fun: a system function
             One attribute:
@@ -71,14 +70,14 @@ def run(varis, probs, sys_fun, rules=None, brs = None, max_sf = np.inf, max_nb =
         start = time.time() # monitoring purpose
 
         if active_decomp:
-            brs, _ = decomp_depth_first(varis, rules, probs, max_nb)  # S2
+            brs, _ = decomp_depth_first(rules, probs, max_nb)  # S2
         else:
 
             if brs is None:
                 brs = []
-            brs, _ = decomp_depth_first(varis, rules, probs, max_nb, brs) # existing branches are not reassessed.
+            brs, _ = decomp_depth_first(rules, probs, max_nb, brs) # existing branches are not reassessed.
 
-        x_star = get_comp_st(brs, surv_first, varis, probs)  # S4-1
+        x_star = get_comp_st(brs, surv_first, probs)  # S4-1
 
         if x_star == None:
             monitor['out_flag'] = 'complete'
@@ -97,7 +96,7 @@ def run(varis, probs, sys_fun, rules=None, brs = None, max_sf = np.inf, max_nb =
             break
 
         else:
-            rule, sys_res_ = run_sys_fn(x_star, sys_fun, varis) # S4-2, S5
+            rule, sys_res_ = run_sys_fn(x_star, sys_fun, probs) # S4-2, S5
 
             rules = update_rule_set(rules, rule) # S6
             sys_res = pd.concat([sys_res, sys_res_], ignore_index=True)
@@ -116,7 +115,7 @@ def run(varis, probs, sys_fun, rules=None, brs = None, max_sf = np.inf, max_nb =
     try:
         if final_decomp and not active_decomp:
             nbr_old = len(brs)
-            brs, _ = decomp_depth_first(varis, rules, probs, max_nb)
+            brs, _ = decomp_depth_first(rules, probs, max_nb)
             print(f"\n*Final decomposition is completed with {len(brs)} branches (originally {nbr_old} branches).")
 
         monitor, ctrl = update_monitor(monitor, brs, rules, start)
@@ -351,7 +350,7 @@ def update_rule_set(rules, new_rule):
     return rules
 
 
-def run_sys_fn(comp, sys_fun, varis):
+def run_sys_fn(comp, sys_fun, probs):
     """
     comp: component vector state in dictionary
     e.g., {'x1': 0, 'x2': 0, ... }
@@ -374,18 +373,18 @@ def run_sys_fn(comp, sys_fun, varis):
         if sys_st == 's':
             rule = {k: v for k, v in comp.items() if v}, sys_st # the rule is the same as up_dict but includes only components whose state is greater than the worst one (i.e. 0)
         else:
-            rule = {k: v for k, v in comp.items() if v < len(varis[k].values) - 1}, sys_st # the rule is the same as up_dict but includes only components whose state is less than the best one
+            rule = {k: v for k, v in comp.items() if v < len(probs[k].values) - 1}, sys_st # the rule is the same as up_dict but includes only components whose state is less than the best one
 
     return rule, sys_res
 
 
-def init_branch(varis, rules):
+def init_branch(probs, rules):
     """
     initialise a branch set (x_min, x_max, s(x_min), s(x_max), 1)
     """
 
-    down = {x: 0 for x in varis.keys()}
-    up = {k: len(v.values) - 1 for k, v in varis.items()}
+    down = {x: 0 for x in probs.keys()}
+    up = {k: len(v.keys()) - 1 for k, v in probs.items()}
 
     down_state = get_state(down, rules)
     up_state = get_state(up, rules)
@@ -393,13 +392,13 @@ def init_branch(varis, rules):
     return [branch.Branch(down, up, down_state, up_state, 1.0)]
 
 
-def decomp_depth_first(varis, rules, probs, max_nb, brs = []):
+def decomp_depth_first(rules, probs, max_nb, brs = []):
     """
     depth-first decomposition of event space using given rules
     """
 
     if len(brs) < 1:
-        brs = init_branch(varis, rules)  # D1
+        brs = init_branch(probs, rules)  # D1
     #crules = [brs[0].get_compat_rules(rules)]
     crules = [br.get_compat_rules(rules) for br in brs]
 
@@ -451,7 +450,7 @@ def decomp_depth_first(varis, rules, probs, max_nb, brs = []):
     return brs, crules
 
 
-def get_comp_st(brs, surv_first=True, varis=None, probs=None):
+def get_comp_st(brs, surv_first=True, probs=None):
     """
     get a component vector state from branches(brs)
     'brs' is a list of branches obtained by depth-first decomposition
@@ -475,8 +474,8 @@ def get_comp_st(brs, surv_first=True, varis=None, probs=None):
 
     else:
 
-        worst = {x: 0 for x in varis.keys()}
-        best = {k: len(v.values) - 1 for k, v in varis.items()}
+        worst = {x: 0 for x in probs.keys()}
+        best = {k: len(v.keys()) - 1 for k, v in probs.items()}
 
         brs_new = []
         for br in brs:
