@@ -14,21 +14,47 @@ import time
 from BNS_JT import variable, branch
 
 
-def run(varis, probs, sys_fun, max_sf = np.inf, max_nb = np.inf, pf_bnd_wr=0.0, max_rules = np.inf, surv_first=True, rules=None, brs = None, display_freq = 200, active_decomp = False, final_decomp = True):
+def run(varis, probs, sys_fun, rules=None, brs = None, max_sf = np.inf, max_nb = np.inf, pf_bnd_wr=0.0, max_rules = np.inf, surv_first=True, active_decomp = False, final_decomp = True, display_freq = 200):
 
     """
-    INPUTS:
-    varis: a dictionary of variable#s
-    probs: a dictionary of probabilities
-    sys_fun: a system function
-    **Iteration termination conditions**
-    max_sf: maximum number of system function runs
-    max_nb: maximum number of branches
-    pf_bnd_wr: bound of system failure probability in ratio (width / lower bound)
-    max_rules: the max number of rules
-    surv_first: True if survival branches are considered first
-    ************************************
-    rules: provided if there are some known rules
+    Run the BRC algorithm to find (1) non-dominated rules and
+    (2) branches for system reliability analysis.
+
+    Attributes:
+        varis (dictionary): {comp_name (str): (variable.Variable)}
+        probs (dictionaty): {comp_name (str): probabilities (list)}
+        sys_fun: a system function
+            One attribute:
+                comp_state (dictionary): {comp_name (str): state (int)}
+            Returns (orders need to be kept):
+                system value (any type)
+                system state ('s' or 'f')
+                minimum rule for system state (dictionary):
+                    {comp_name (str): state (int)}
+
+        **Information from previous analysis (optional when available)**
+            rules (dictionary): {'s': list of rules, 'f': list of rules}
+            brs (list): branches from previous analysis
+
+        **Iteration termination conditions**
+            max_sf (int): maximum number of system function runs
+            max_nb (int): maximum number of branches
+            pf_bnd_wr (float, non-negative): bound of system failure probability
+                in ratio (width / lower bound)
+            max_rules (int): the maximum number of rules
+        **Decomposition options**
+            surv_first: True if survival branches are considered first
+            active_decomp: True if branches are re-obtained at each iteration
+            final_decomp: True if final decomposition is performed
+                (only when active_decomp = False)
+        **Display options**
+            display_freq (int): frequency of displaying the current progress
+
+    Returns:
+        brs (list): branches
+        rules (dictionary): {'s': list of rules, 'f': list of rules}
+        sys_res (pandas.DataFrame): system function results
+        monitor (dictionary): monitoring information
     """
 
     if not rules:
@@ -91,19 +117,17 @@ def run(varis, probs, sys_fun, max_sf = np.inf, max_nb = np.inf, pf_bnd_wr=0.0, 
         if final_decomp and not active_decomp:
             nbr_old = len(brs)
             brs, _ = decomp_depth_first(varis, rules, probs, max_nb)
-            print(f"*Final decomposition is completed with {len(brs)} branches (originally {nbr_old} branches).")
+            print(f"\n*Final decomposition is completed with {len(brs)} branches (originally {nbr_old} branches).")
 
         monitor, ctrl = update_monitor(monitor, brs, rules, start)
 
-        print(f"*** Analysis completed with f_sys runs {ctrl['no_sf']}: out_flag = {monitor['out_flag']} ***")
+        print(f"\n***Analysis completed with f_sys runs {ctrl['no_sf']}: out_flag = {monitor['out_flag']}***")
         display_msg(monitor)
 
     except NameError: # analysis is terminated before the first system function run
-        print(f'***Analysis terminated without any evaluation***')
-
+        print(f'\n***Analysis terminated without any evaluation***')
 
     return brs, rules, sys_res, monitor
-
 
 
 def init_monitor():
