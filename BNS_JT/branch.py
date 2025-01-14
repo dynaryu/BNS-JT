@@ -311,8 +311,8 @@ def load_brs_from_parquet(file_path):
     brs_list = []
     for _, row in df.iterrows():
         # Reconstruct 'down' and 'up' dictionaries by filtering columns with appropriate prefixes
-        down = {key.replace('down_', ''): row[key] for key in row.index if key.startswith('down_')}
-        up = {key.replace('up_', ''): row[key] for key in row.index if key.startswith('up_')}
+        down = {key.replace('down_', ''): row[key] for key in row.index if key.startswith('down_') and not key == 'down_state'}
+        up = {key.replace('up_', ''): row[key] for key in row.index if key.startswith('up_') and not key == 'up_state'}
 
         # Create a Branch object with reconstructed dictionaries
         branch = Branch(
