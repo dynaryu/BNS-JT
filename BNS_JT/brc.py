@@ -14,7 +14,7 @@ import time
 from BNS_JT import variable, branch
 
 
-def run(probs, sys_fun, rules=None, brs = None, max_sf = np.inf, max_nb = np.inf, pf_bnd_wr=0.0, max_rules = np.inf, surv_first=True, active_decomp = False, final_decomp = True, display_freq = 200):
+def run(probs, sys_fun, rules=None, brs = None, max_sf = np.inf, max_nb = np.inf, pf_bnd_wr=0.0, max_rules = np.inf, surv_first=True, active_decomp = 20, final_decomp = True, display_freq = 200):
 
     """
     Run the BRC algorithm to find (1) non-dominated rules and
@@ -44,6 +44,8 @@ def run(probs, sys_fun, rules=None, brs = None, max_sf = np.inf, max_nb = np.inf
         **Decomposition options**
             surv_first: True if survival branches are considered first
             active_decomp: True if branches are re-obtained at each iteration
+                False if branches are never re-evaluated
+                int (>0) if regularly re-evaluated
             final_decomp: True if final decomposition is performed
                 (only when active_decomp = False)
         **Display options**
@@ -69,13 +71,21 @@ def run(probs, sys_fun, rules=None, brs = None, max_sf = np.inf, max_nb = np.inf
 
         start = time.time() # monitoring purpose
 
-        if active_decomp:
+        if active_decomp is True:
             brs, _ = decomp_depth_first(rules, probs, max_nb)  # S2
-        else:
+        elif active_decomp is False or active_decomp==0:
 
             if brs is None:
                 brs = []
             brs, _ = decomp_depth_first(rules, probs, max_nb, brs) # existing branches are not reassessed.
+        else:
+            if ctrl['no_sf'] % active_decomp == 0:
+                brs, _ = decomp_depth_first(rules, probs, max_nb)  # S2
+
+            else:
+                if brs is None:
+                    brs = []
+                brs, _ = decomp_depth_first(rules, probs, max_nb, brs) # existing branches are not reassessed.
 
         x_star = get_comp_st(brs, surv_first, probs)  # S4-1
 
@@ -113,7 +123,7 @@ def run(probs, sys_fun, rules=None, brs = None, max_sf = np.inf, max_nb = np.inf
             monitor['out_flag'] = 'max_sf'
 
     try:
-        if final_decomp and not active_decomp:
+        if final_decomp and (active_decomp is False or active_decomp > 1):
             nbr_old = len(brs)
             brs, _ = decomp_depth_first(rules, probs, max_nb)
             print(f"\n*Final decomposition is completed with {len(brs)} branches (originally {nbr_old} branches).")
