@@ -174,7 +174,7 @@ def update_G_given_comps_st(G, comps_st, varis=None):
                 k = e[2]['label']
                 attributes[(e[0], e[1])] = {'weight': varis[k].values[comps_st[k]]}
 
-         # update H
+        # update H
         nx.set_edge_attributes(H, attributes)
 
     else:
