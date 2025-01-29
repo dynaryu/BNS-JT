@@ -271,14 +271,38 @@ class Cpm(object):
                 self.p = np.ones(shape=(self.C.shape[0], 1))
 
         if self.q.size:
-            if not M.q.size:
-                M.q = np.ones(shape=(M.Cs.shape[0], 1))
-        else:
-            if M.q.size:
-                self.q = np.ones(shape=(self.Cs.shape[0], 1))
+            if not self.ps.size:
+                self.ps = self.q.copy()
+            if not self.sample_idx.size:
+                self.sample_idx = np.arange(self.Cs.shape[0]).reshape(-1, 1)
+        
+        if M.q.size:
+            if not M.ps.size:
+                M.ps = M.q.copy()
+            if not M.sample_idx.size:
+                M.sample_idx = np.arange(M.Cs.shape[0]).reshape(-1, 1)
 
-        # case 1
-        if self._C and not self._Cs and M._C and not M._Cs:
+        # Product starts here
+        if self._C:
+            if M._C:
+                Cnew, pnew = C_prod_C(self, M, new_vars)
+                Mprod.C, Mprod.p = Cnew, pnew
+            
+            elif M._Cs and not self._Cs:
+                Cs_new, q_new, ps_new, sample_idx_new = C_prod_Cs(self, M, new_vars)
+                Mprod.Cs, Mprod.q = Cs_new, q_new
+                Mprod.ps, Mprod.sample_idx = ps_new, sample_idx_new
+
+            elif self._Cs:
+                Cs_new1, q_new1, ps_new1, sample_idx_new1 = C_prod_Cs(self, M, new_vars)
+                ####290125
+                
+
+
+            
+
+            
+            and not self._Cs and M._C and not M._Cs:
 
             Cnew_with_minus1 = _get_Cnew(self.C, M.C, self.variables, M.variables, new_vars)
 
@@ -1136,6 +1160,61 @@ class Cpm(object):
         cov = std/prob
 
         return prob, cov, cint
+    
+def C_prod_C(M1, M2, new_vars):
+    """
+    Product of two C matrices (i.e. not Cs matrices)
+    """
+    Cnew_with_minus1 = _get_Cnew(M1.C, M2.C, M1.variables, M2.variables, new_vars)
+
+    n_row1, n_row2 = len(M1.C), len(M2.C)
+    pnew = np.repeat(M1.p, n_row2) * np.tile(M2.p, (n_row1, 1)).flatten()
+
+    mask = np.sum( Cnew_with_minus1 < 0, axis=1 ) < 1
+    Cnew, pnew = Cnew_with_minus1[mask], pnew[mask]
+
+    return Cnew, pnew
+
+def C_prod_Cs(M1, M2, new_vars):
+    """
+    Product of C (M1) and Cs (M2) matrices
+    """
+    Cnew_with_minus1 = _get_Cnew(M1.C, M2.Cs, M1.variables, M2.variables, new_vars)
+
+    n_row1, n_row2 = len(M1.C), len(M2.Cs)
+    ps_new = np.repeat(M1.p, n_row2) * np.tile(M2.q, (n_row1, 1)).flatten()
+    sample_idx_new = np.tile(M2.sample_idx, (n_row1, 1))
+    q_new = np.tile(M2.q, (n_row1, 1))
+
+    mask = np.sum( Cnew_with_minus1 < 0, axis=1 ) < 1
+    Cs_new, ps_new = Cnew_with_minus1[mask], ps_new[mask]
+    q_new, sample_idx_new = q_new[mask], sample_idx_new[mask]
+
+    return Cs_new, q_new, ps_new, sample_idx_new
+
+def Cs_prod_Cs(M1, M2, new_vars):
+    """
+    Product of two Cs matrices
+    """
+
+    unique_sidx_M1 = np.unique(M1.sample_idx)
+    unique_sidx_M2 = np.unique(M2.sample_idx)
+
+    only_in_M1 = unique_sidx_M1 - unique_sidx_M2
+    only_in_M2 = unique_sidx_M2 - unique_sidx_M1
+
+    if only_in_M1 or only_in_M2:
+        warnings.warn(
+            f"Mismatch in unique sample indices between M1 and M2.\n"
+            f"Indices only in M1: {sorted(only_in_M1)}\n"
+            f"Indices only in M2: {sorted(only_in_M2)}",
+            UserWarning
+        )
+
+    Cs_new = np.array([], dtype=int).reshape(0, len(new_vars))
+    for idx in unique_sidx_M1:
+        ######### 290125
+
 
 def _get_Cnew(C1, C2, vars1, vars2, new_vars):
     """

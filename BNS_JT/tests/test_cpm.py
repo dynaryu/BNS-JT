@@ -13,6 +13,23 @@ from BNS_JT import cpm, variable, config, trans, operation
 
 HOME = Path(__file__).parent
 
+@pytest.fixture
+def two_cpms_with_Cs():
+    x1 = variable.Variable(name='x1', values=['fail', 'surv'])
+    x2 = variable.Variable(name='x2', values=['fail', 'surv'])
+    x3 = variable.Variable(name='x3', values=['fail', 'surv'])
+
+    M1 = cpm.Cpm(variables=[x1, x2], no_child=2,
+                 Cs=np.array([0,1],[1,1],[1,0],[0,0]),
+                 q=[0.1*0.8, 0.9*0.8, 0.9*0.2, 0.1*0.2],
+                 sample_idx=[0,1,2,3])
+    M2 = cpm.Cpm(variables=[x3, x2], no_child=1,
+                 Cs=np.array([0,1],[1,1],[0,1],[1,1],[0,0],[1,0],[0,0],[1,0]), 
+                 q=[0.1, 0.9, 0.1, 0.9, 0.9, 0.1 0.9, 0.1], 
+                 sample_idx=[0,0,1,1,2,2,3,3]) 
+    
+    return M1, M2
+
 
 @pytest.fixture
 def dict_cpm():
