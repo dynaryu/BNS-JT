@@ -263,25 +263,6 @@ class Cpm(object):
         else:
             Mprod = M
 
-        if self.p.size:
-            if not M.p.size:
-                M.p = np.ones(shape=(M.C.shape[0], 1))
-        else:
-            if M.p.size:
-                self.p = np.ones(shape=(self.C.shape[0], 1))
-
-        if self.q.size:
-            if not self.ps.size:
-                self.ps = self.q.copy()
-            if not self.sample_idx.size:
-                self.sample_idx = np.arange(self.Cs.shape[0]).reshape(-1, 1)
-        
-        if M.q.size:
-            if not M.ps.size:
-                M.ps = M.q.copy()
-            if not M.sample_idx.size:
-                M.sample_idx = np.arange(M.Cs.shape[0]).reshape(-1, 1)
-
         # Product starts here
         if self._C:
             if M._C:
@@ -295,110 +276,56 @@ class Cpm(object):
 
             elif self._Cs:
                 Cs_new1, q_new1, ps_new1, sample_idx_new1 = C_prod_Cs(self, M, new_vars)
-                ####290125
-                
+                Cs_new2, q_new2, ps_new2, sample_idx_new2 = Cs_prod_Cs(
+                    self.Cs, M.Cs, self.variables, M.variables,
+                    self.q, M.q, self.ps, M.ps, self.sample_idx, M.sample_idx, new_vars)
 
+                Cs_new = np.vstack([Cs_new1, Cs_new2])
+                q_new = np.vstack([q_new1, q_new2])
+                ps_new = np.concatenate([ps_new1, ps_new2])
+                sample_idx_new = np.concatenate([sample_idx_new1, sample_idx_new2])
 
-            
+                # Sort all sample arrays based on sample_idx
+                sort_idx = np.argsort(sample_idx_new.flatten())
+                Cs_new = Cs_new[sort_idx]
+                q_new = q_new[sort_idx]
+                ps_new = ps_new[sort_idx]
 
-            
-            and not self._Cs and M._C and not M._Cs:
+                Mprod.Cs, Mprod.q, = Cs_new, q_new
+                Mprod.ps, Mprod.sample_idx = ps_new, sample_idx_new
 
-            Cnew_with_minus1 = _get_Cnew(self.C, M.C, self.variables, M.variables, new_vars)
+        else:
+            if M._C and M._Cs:
+                Cs_new1, q_new1, ps_new1, sample_idx_new1 = C_prod_Cs(M, self, new_vars)
+                Cs_new2, q_new2, ps_new2, sample_idx_new2 = Cs_prod_Cs(
+                    M.Cs, self.Cs, M.variables, self.variables,
+                    M.q, self.q, M.ps, self.ps, M.sample_idx, self.sample_idx, new_vars)
 
-            n_row1, n_row2 = len(self.C), len(M.C)
-            pnew = np.repeat(self.p, n_row2) * np.tile(M.p, (n_row1, 1)).flatten()
+                Cs_new = np.vstack([Cs_new1, Cs_new2])
+                q_new = np.vstack([q_new1, q_new2])
+                ps_new = np.concatenate([ps_new1, ps_new2])
+                sample_idx_new = np.concatenate([sample_idx_new1, sample_idx_new2])
 
-            mask = np.sum( Cnew_with_minus1 < 0, axis=1 ) < 1
-            Cnew, pnew = Cnew_with_minus1[mask], pnew[mask]
+                sort_idx = np.argsort(sample_idx_new.flatten())
+                Cs_new = Cs_new[sort_idx]
+                q_new = q_new[sort_idx]
+                ps_new = ps_new[sort_idx]
 
-            Mprod.C, Mprod.p = Cnew, pnew
+                Mprod.Cs, Mprod.q, = Cs_new, q_new
+                Mprod.ps, Mprod.sample_idx = ps_new, sample_idx_new
 
-        # case 2
-        elif self._C and not self._Cs and not M._C and M._Cs:
+            elif M._C:
+                Cs_new, q_new, ps_new, sample_idx_new = C_prod_Cs(M, self, new_vars)
+                Mprod.Cs, Mprod.q = Cs_new, q_new
+                Mprod.ps, Mprod.sample_idx = ps_new, sample_idx_new
 
-            # Initialize lists to collect results
-            Cs_new = []
-            q_new = []
-            ps_new = []
-            sample_idx_new = []
+            elif M._Cs:
+                Cs_new, q_new, ps_new, sample_idx_new = Cs_prod_Cs(
+                    self.Cs, M.Cs, self.variables, M.variables,
+                    self.q, M.q, self.ps, M.ps, self.sample_idx, M.sample_idx, new_vars)
 
-            for (c2, q2, ps2, idx2) in zip(M._Cs, M._q, M._ps, M._sample_idx):
-                Cnew_with_minus1 = _get_Cnew(self.C, [c2], self.variables, M.variables, new_vars)
-
-                n_row1 = len(self.C)
-                q_new_current = np.repeat(self.q, 1) * q2
-                ps_new_current = np.repeat(self.p, 1) * ps2
-
-                # Apply the mask to filter valid rows
-                mask = np.sum(Cnew_with_minus1 < 0, axis=1) < 1
-                Cnew_filtered = Cnew_with_minus1[mask]
-                q_new_filtered = q_new_current[mask]
-                ps_new_filtered = ps_new_current[mask]
-
-                # Append filtered results to the lists
-                Cs_new.append(Cnew_filtered)
-                q_new.append(q_new_filtered)
-                ps_new.append(ps_new_filtered)
-                sample_idx_new.extend(np.repeat(idx2, Cnew_filtered.shape[0]))
-
-            # Combine all filtered results
-            Mprod.Cs = np.vstack(Cs_new)
-            Mprod.q = np.vstack(q_new)
-            Mprod.ps = np.concatenate(ps_new)
-            Mprod.sample_idx = np.array(sample_idx_new)
-
-        # case 3
-        elif self._C and not self._Cs and M._C and M._Cs:
-            Cnew_with_minus1 = _get_Cnew(self.C, M.C, self.variables, M.variables, new_vars)
-
-            n_row1, n_row2 = len(self.C), len(M.C)
-            pnew = np.repeat(self.p, n_row2) * np.tile(M.p, (n_row1, 1)).flatten()
-
-            mask = np.sum( Cnew_with_minus1 < 0, axis=1 ) < 1
-            Cnew, pnew = Cnew_with_minus1[mask], pnew[mask]
-
-            Mprod.C, Mprod.p = Cnew, pnew
-            ############### 060125
-
-
-
-        if self.Cs.size and M.Cs.size:
-            Csprod, qprod, psprod, sample_idx_prod = [], [], [], []
-
-            self.q = np.prod(self.q, axis=1)
-            M.q = np.prod(M.q, axis = 1)
-            if self.ps.size:
-                self.ps = np.prod(self.ps, axis=1)
-            else:
-                self.ps = self.q.copy()
-            if M.ps.size:
-                M.ps = np.prod(M.ps, axis=1)
-            else:
-                M.ps = M.q.copy()
-
-            for i in range(self.Cs.shape[0]):
-
-                #c1 = get_value_given_condn(self.Cs[i, :], idx_vars)
-                c1_not_com = self.Cs[i, flip(idx_vars)]
-
-                M_idx = np.where(M.sample_idx==self.sample_idx[i][0])[0]
-                c2 = M.Cs[M_idx,:][0]
-
-                _csprod = np.concatenate((c2, c1_not_com), axis = 0 )
-                Csprod.append([_csprod])
-
-                qprod.append(get_prod(M.q[M_idx], self.q[i]))
-                psprod.append(get_prod(M.ps[M_idx], self.ps[i]))
-
-            Csprod = np.concatenate(Csprod, axis=0)
-            psprod = np.concatenate(psprod, axis=0)
-            qprod = np.concatenate(qprod, axis=0)
-
-            Mprod.Cs = Csprod[:, idx_vars2].astype(int)
-            Mprod.q = qprod
-            Mprod.ps = psprod
-            Mprod.sample_idx = self.sample_idx.copy()
+                Mprod.Cs, Mprod.q, = Cs_new, q_new
+                Mprod.ps, Mprod.sample_idx = ps_new, sample_idx_new
 
         return  Mprod
     
@@ -1192,13 +1119,15 @@ def C_prod_Cs(M1, M2, new_vars):
 
     return Cs_new, q_new, ps_new, sample_idx_new
 
-def Cs_prod_Cs(M1, M2, new_vars):
+def Cs_prod_Cs(Cs1, Cs2, vars1, vars2, q1, q2, ps1, ps2, sample_idx1, sample_idx2, new_vars):
     """
     Product of two Cs matrices
     """
 
-    unique_sidx_M1 = np.unique(M1.sample_idx)
-    unique_sidx_M2 = np.unique(M2.sample_idx)
+    # Give warnings if there is a mismatch in sample indices between Cs1 and Cs2
+    # Mismatching indices will be ignored
+    unique_sidx_M1 = np.unique(sample_idx1)
+    unique_sidx_M2 = np.unique(sample_idx1)
 
     only_in_M1 = unique_sidx_M1 - unique_sidx_M2
     only_in_M2 = unique_sidx_M2 - unique_sidx_M1
@@ -1211,9 +1140,41 @@ def Cs_prod_Cs(M1, M2, new_vars):
             UserWarning
         )
 
+    new_vars_tf1, new_vars_idx1 = ismember( new_vars, vars1 )
+    new_vars_tf2, new_vars_idx2 = ismember( new_vars, vars2 )    
+
     Cs_new = np.array([], dtype=int).reshape(0, len(new_vars))
-    for idx in unique_sidx_M1:
-        ######### 290125
+    qs_new = np.array([])
+    ps_new = np.array([])
+    sample_idx_new = np.array([])
+
+    # Mapping Cs_new's columns to Cs1's and Cs2's columns
+    # Cs_col_map[0] is the index of Cs1's columns
+    # Cs_col_map[1] is the index of Cs2's columns
+    Cs_col_map = [[], []]
+    for i, (tf1, tf2, idx1, idx2) in enumerate(zip(new_vars_tf1, new_vars_tf2, new_vars_idx1, new_vars_idx2)):
+        if tf1:
+            Cs_col_map[0].append([i, idx1])
+        elif tf2:
+            Cs_col_map[1].append([i, idx2])
+
+    for c1, q1, ps1, sidx1 in zip(Cs1, q1, ps1, sample_idx1):
+        row_idx2 = np.where(sample_idx2 == sidx1)[0]
+
+        for i2 in row_idx2:
+            if Cs2[i2][new_vars_idx2] == c1[new_vars_idx1]:
+                cs_new = np.zeros((1, len(new_vars)))
+                for i, idx in Cs_col_map[0]:
+                    cs_new[0, i] = c1[idx]
+                for i, idx in Cs_col_map[1]:
+                    cs_new[0, i] = Cs2[i2][idx]
+
+                Cs_new = np.vstack([Cs_new, cs_new])    
+                qs_new = np.append(qs_new, q1*q2[i2])
+                ps_new = np.append(ps_new, ps1*ps2[i2])
+                sample_idx_new = np.append(sample_idx_new, sidx1)
+
+    return Cs_new, qs_new, ps_new, sample_idx_new
 
 
 def _get_Cnew(C1, C2, vars1, vars2, new_vars):
