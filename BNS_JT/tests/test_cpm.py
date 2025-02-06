@@ -20,12 +20,12 @@ def two_cpms_with_Cs():
     x3 = variable.Variable(name='x3', values=['fail', 'surv'])
 
     M1 = cpm.Cpm(variables=[x1, x2], no_child=2,
-                 Cs=np.array([0,1],[1,1],[1,0],[0,0]),
+                 Cs=np.array([[0,1],[1,1],[1,0],[0,0]]),
                  q=[0.1*0.8, 0.9*0.8, 0.9*0.2, 0.1*0.2],
                  sample_idx=[0,1,2,3])
     M2 = cpm.Cpm(variables=[x3, x2], no_child=1,
-                 Cs=np.array([0,1],[1,1],[0,1],[1,1],[0,0],[1,0],[0,0],[1,0]), 
-                 q=[0.1, 0.9, 0.1, 0.9, 0.9, 0.1 0.9, 0.1], 
+                 Cs=np.array([[0,1],[1,1],[0,1],[1,1],[0,0],[1,0],[0,0],[1,0]]), 
+                 q=[0.1, 0.9, 0.1, 0.9, 0.9, 0.1, 0.9, 0.1], 
                  sample_idx=[0,0,1,1,2,2,3,3]) 
     
     return M1, M2
@@ -305,9 +305,13 @@ def setup_hybrid():
 
     # samples
     cpms['haz'].Cs, cpms['haz'].q, cpms['haz'].sample_idx = np.array([0,0,0,1,0]), [0.7,0.7,0.7,0.3,0.7], [0,1,2,3,4]
+    cpms['haz'].ps = [0.7,0.7,0.7,0.3,0.7]
     cpms['x0'].Cs, cpms['x0'].q, cpms['x0'].sample_idx = np.array([[0,0],[1,0],[1,0],[0,1],[1,0]]), [0.1,0.9,0.9,0.2,0.9], [0,1,2,3,4]
+    cpms['x0'].ps = [0.1,0.9,0.9,0.2,0.9]
     cpms['x1'].Cs, cpms['x1'].q, cpms['x1'].sample_idx = np.array([[1,0],[0,0],[0,0],[1,1],[0,0]]), [0.7,0.3,0.3,0.6,0.3], [0,1,2,3,4]
+    cpms['x1'].ps = [0.7,0.3,0.3,0.6,0.3]
     cpms['sys'].Cs, cpms['sys'].q, cpms['sys'].sample_idx = np.array([[0,0,1],[1,1,0],[1,1,0],[0,0,1],[1,1,0]]), [1,1,1,1,1], [0,1,2,3,4]
+    cpms['sys'].ps = [1,1,1,1,1]
 
     return varis, cpms
 

@@ -264,17 +264,25 @@ class Cpm(object):
             Mprod = M
 
         # Product starts here
-        if self._C:
-            if M._C:
+        if self._C.size:
+            if M._C.size:
                 Cnew, pnew = C_prod_C(self, M, new_vars)
                 Mprod.C, Mprod.p = Cnew, pnew
+
+                if M._Cs.size and self._Cs.size:
+                    Cs_new, q_new, ps_new, sample_idx_new = Cs_prod_Cs(
+                    self.Cs, M.Cs, self.variables, M.variables,
+                    self.q, M.q, self.ps, M.ps, self.sample_idx, M.sample_idx, new_vars)
+
+                    Mprod.Cs, Mprod.q = Cs_new, q_new
+                    Mprod.ps, Mprod.sample_idx = ps_new, sample_idx_new
             
-            elif M._Cs and not self._Cs:
+            elif M._Cs.size and not self._Cs.size:
                 Cs_new, q_new, ps_new, sample_idx_new = C_prod_Cs(self, M, new_vars)
                 Mprod.Cs, Mprod.q = Cs_new, q_new
                 Mprod.ps, Mprod.sample_idx = ps_new, sample_idx_new
 
-            elif self._Cs:
+            elif self._Cs.size:
                 Cs_new1, q_new1, ps_new1, sample_idx_new1 = C_prod_Cs(self, M, new_vars)
                 Cs_new2, q_new2, ps_new2, sample_idx_new2 = Cs_prod_Cs(
                     self.Cs, M.Cs, self.variables, M.variables,
@@ -295,7 +303,7 @@ class Cpm(object):
                 Mprod.ps, Mprod.sample_idx = ps_new, sample_idx_new
 
         else:
-            if M._C and M._Cs:
+            if M._C.size and M._Cs.size:
                 Cs_new1, q_new1, ps_new1, sample_idx_new1 = C_prod_Cs(M, self, new_vars)
                 Cs_new2, q_new2, ps_new2, sample_idx_new2 = Cs_prod_Cs(
                     M.Cs, self.Cs, M.variables, self.variables,
@@ -311,15 +319,15 @@ class Cpm(object):
                 q_new = q_new[sort_idx]
                 ps_new = ps_new[sort_idx]
 
-                Mprod.Cs, Mprod.q, = Cs_new, q_new
+                Mprod.Cs, Mprod.q = Cs_new, q_new
                 Mprod.ps, Mprod.sample_idx = ps_new, sample_idx_new
 
-            elif M._C:
+            elif M._C.size:
                 Cs_new, q_new, ps_new, sample_idx_new = C_prod_Cs(M, self, new_vars)
                 Mprod.Cs, Mprod.q = Cs_new, q_new
                 Mprod.ps, Mprod.sample_idx = ps_new, sample_idx_new
 
-            elif M._Cs:
+            elif M._Cs.size:
                 Cs_new, q_new, ps_new, sample_idx_new = Cs_prod_Cs(
                     self.Cs, M.Cs, self.variables, M.variables,
                     self.q, M.q, self.ps, M.ps, self.sample_idx, M.sample_idx, new_vars)
@@ -1132,7 +1140,7 @@ def Cs_prod_Cs(Cs1, Cs2, vars1, vars2, q1, q2, ps1, ps2, sample_idx1, sample_idx
     only_in_M1 = unique_sidx_M1 - unique_sidx_M2
     only_in_M2 = unique_sidx_M2 - unique_sidx_M1
 
-    if only_in_M1 or only_in_M2:
+    if only_in_M1.size or only_in_M2.size:
         warnings.warn(
             f"Mismatch in unique sample indices between M1 and M2.\n"
             f"Indices only in M1: {sorted(only_in_M1)}\n"
@@ -1142,6 +1150,13 @@ def Cs_prod_Cs(Cs1, Cs2, vars1, vars2, q1, q2, ps1, ps2, sample_idx1, sample_idx
 
     new_vars_tf1, new_vars_idx1 = ismember( new_vars, vars1 )
     new_vars_tf2, new_vars_idx2 = ismember( new_vars, vars2 )    
+
+    # Common variables
+    com_vars_idx1, com_vars_idx2 = [], []
+    for tf1, tf2, idx1, idx2 in zip(new_vars_tf1, new_vars_tf2, new_vars_idx1, new_vars_idx2):
+        if tf1 and tf2:
+            com_vars_idx1.append(idx1)
+            com_vars_idx2.append(idx2)
 
     Cs_new = np.array([], dtype=int).reshape(0, len(new_vars))
     qs_new = np.array([])
@@ -1162,7 +1177,7 @@ def Cs_prod_Cs(Cs1, Cs2, vars1, vars2, q1, q2, ps1, ps2, sample_idx1, sample_idx
         row_idx2 = np.where(sample_idx2 == sidx1)[0]
 
         for i2 in row_idx2:
-            if Cs2[i2][new_vars_idx2] == c1[new_vars_idx1]:
+            if Cs2[i2][com_vars_idx2] == c1[com_vars_idx1]:
                 cs_new = np.zeros((1, len(new_vars)))
                 for i, idx in Cs_col_map[0]:
                     cs_new[0, i] = c1[idx]
@@ -1173,6 +1188,9 @@ def Cs_prod_Cs(Cs1, Cs2, vars1, vars2, q1, q2, ps1, ps2, sample_idx1, sample_idx
                 qs_new = np.append(qs_new, q1*q2[i2])
                 ps_new = np.append(ps_new, ps1*ps2[i2])
                 sample_idx_new = np.append(sample_idx_new, sidx1)
+
+    Cs_new.astype(int)
+    sample_idx_new.astype(int)
 
     return Cs_new, qs_new, ps_new, sample_idx_new
 
