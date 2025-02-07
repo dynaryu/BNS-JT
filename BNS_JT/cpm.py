@@ -9,29 +9,27 @@ from BNS_JT import utils
 
 
 class Cpm(object):
-    """
-    Defines the conditional probability matrix (cf., CPT)
+    '''Defines the conditional probability matrix (CPM).
+    CPM plays the same role as CPT in conventional Bayesian networks.
+    Ref: Byun et al. (2019). Matrix-based Bayesian Network for
+    efficient memory storage and flexible inference. 
+    Reliability Engineering & System Safety, 185, 533-545.
 
-    Parameters
-    ----------
-    variables: list
-        list of instances of Variable
-    no_child: int
-        number of child nodes
-    C: array_like
-        event matrix (referencing row of Variable)
-    p: array_like
-        probability vector (n x 1)
-    q: array_like
-        sampling weight vector for continuous r.v. (n x 1)
-    sample_idx: array_like
-        sample index vector (n x 1)
+    Attributes:
+        variables (list): list of instances of Variable objects.
+        no_child (int): number of child nodes.
+        C (array_like): event matrix.
+        p (array_like): probability vector related to C.
+        Cs (array_like): event matrix of samples.
+        q (array_like): sampling probability vector related to Cs.
+        sample_idx (array_like): sample index vector related to Cs.
+        ps (array_like): probability vector of samples.
+        Sample weights are calculated as ps/q.
 
-    Examples
-    --------
-
-    Cpm(varibles, no_child, C, p, q, sample_idx)
-    """
+    Notes:
+        C and p have the same number of rows.
+        Cs, q, sample_idx, and ps have the same number of rows.
+    '''
 
     def __init__(self, variables, no_child, C=[], p=[], Cs=[], q=[], ps=[], sample_idx=[]):
 
@@ -44,6 +42,51 @@ class Cpm(object):
         self.ps = ps
         self.sample_idx = sample_idx
 
+    # Magic methods
+    def __hash__(self):
+        return hash(self._name)
+    
+    def __eq__(self, other):
+        if isinstance(other, Cpm):
+            return (
+                self._name == other._name and
+                self._variables == other._variables and
+                self._no_child == other._no_child and
+                self._C == other._C and
+                self._p == other._p and
+                self._Cs == other._Cs and
+                self._q == other._q and
+                (
+                    (not self._ps or not other._ps or self._ps == other._ps) and
+                    (not self._sample_idx or not other._sample_idx or 
+                     self._sample_idx == other._sample_idx)
+                )
+            )
+        else:
+            return False
+
+    def __repr__(self):
+        details = [
+            f"{self.__class__.__name__}(",
+            f"    variables={self.get_names()},",
+            f"    no_child={self.no_child},",
+            f"    C={self.C},",
+            f"    p={self.p},",
+        ]
+
+        if self._Cs:
+            details.append(f"    Cs={self._Cs},")
+        if self._q:
+            details.append(f"    q={self._q},")
+        if self._ps:
+            details.append(f"    ps={self._ps},")
+        if self._sample_idx:
+            details.append(f"    sample_idx={self._sample_idx},")
+
+        details.append(")")
+        return "\n".join(details)
+    
+    # Properties
     @property
     def variables(self):
         return self._variables
@@ -183,11 +226,256 @@ class Cpm(object):
 
             all(isinstance(y, (float, np.float32, np.float64, int, np.int32, np.int64)) for y in value), 'p must be a numeric vector'
 
-        self._sample_idx = value
+        self._sample_idx = value    
 
-    def __repr__(self):
-        return textwrap.dedent(f'''\
-{self.__class__.__name__}(variables={self.get_names()}, no_child={self.no_child}, C={self.C}, p={self.p}''')
+
+    def product(self, M):
+        """
+        Returns an instance of Cpm
+        M: instance of Cpm
+        var: a dict of instances of Variable
+        """
+
+        assert isinstance(M, Cpm), f'M should be an instance of Cpm'
+
+        ch_names1 = [x.name for x in self.variables[:self.no_child]]
+        ch_names2 = [x.name for x in M.variables[:M.no_child]]
+        check = set(ch_names1).intersection(ch_names2)
+        assert not bool(check), f'PMFs must not have common child nodes: {ch_names1}, {ch_names2}'
+
+        if self.C.size or self.Cs.size:
+            idx_vars, _ = ismember(self.variables, M.variables)
+            prod_vars = M.variables + get_value_given_condn(self.variables, flip(idx_vars))
+
+            new_child = self.variables[:self.no_child] + M.variables[:M.no_child]
+
+            new_parent = self.variables[self.no_child:] + M.variables[M.no_child:]
+            new_parent, _ = setdiff(new_parent, new_child)
+
+            if new_parent:
+                new_vars = new_child + new_parent
+            else:
+                new_vars = new_child
+            _, idx_vars2 = ismember(new_vars, prod_vars)
+
+            Mprod = Cpm(variables=new_vars,
+                        no_child = len(new_child))
+        else:
+            Mprod = M
+
+        # Product starts here
+        if self._C.size:
+            if M._C.size:
+                Cnew, pnew = C_prod_C(self, M, new_vars)
+                Mprod.C, Mprod.p = Cnew, pnew
+
+                if M._Cs.size and self._Cs.size:
+                    Cs_new, q_new, ps_new, sample_idx_new = Cs_prod_Cs(
+                    self.Cs, M.Cs, self.variables, M.variables,
+                    self.q, M.q, self.ps, M.ps, self.sample_idx, M.sample_idx, new_vars)
+
+                    Mprod.Cs, Mprod.q = Cs_new, q_new
+                    Mprod.ps, Mprod.sample_idx = ps_new, sample_idx_new
+
+                elif M._Cs.size and not self._Cs.size:
+                    Cs_new, q_new, ps_new, sample_idx_new = C_prod_Cs(self, M, new_vars)
+                    Mprod.Cs, Mprod.q = Cs_new, q_new
+                    Mprod.ps, Mprod.sample_idx = ps_new, sample_idx_new
+
+                elif self._Cs.size and not M._Cs.size:
+                    Cs_new, q_new, ps_new, sample_idx_new = C_prod_Cs(M, self, new_vars)
+                    Mprod.Cs, Mprod.q = Cs_new, q_new
+                    Mprod.ps, Mprod.sample_idx = ps_new, sample_idx_new
+            
+            elif M._Cs.size and not self._Cs.size:
+                Cs_new, q_new, ps_new, sample_idx_new = C_prod_Cs(self, M, new_vars)
+                Mprod.Cs, Mprod.q = Cs_new, q_new
+                Mprod.ps, Mprod.sample_idx = ps_new, sample_idx_new
+
+            elif self._Cs.size:
+                Cs_new1, q_new1, ps_new1, sample_idx_new1 = C_prod_Cs(self, M, new_vars)
+                Cs_new2, q_new2, ps_new2, sample_idx_new2 = Cs_prod_Cs(
+                    self.Cs, M.Cs, self.variables, M.variables,
+                    self.q, M.q, self.ps, M.ps, self.sample_idx, M.sample_idx, new_vars)
+
+                Cs_new = np.vstack([Cs_new1, Cs_new2])
+                q_new = np.concatenate([q_new1, q_new2])
+                ps_new = np.concatenate([ps_new1, ps_new2])
+                sample_idx_new = np.concatenate([sample_idx_new1.flatten(), sample_idx_new2.flatten()])
+
+                # Sort all sample arrays based on sample_idx
+                sort_idx = np.argsort(sample_idx_new)
+                Cs_new = Cs_new[sort_idx]
+                q_new = q_new[sort_idx]
+                ps_new = ps_new[sort_idx]
+                sample_idx_new = sample_idx_new[sort_idx]
+
+                Mprod.Cs, Mprod.q, = Cs_new.astype(int), q_new
+                Mprod.ps, Mprod.sample_idx = ps_new, sample_idx_new.astype(int)
+
+        else:
+            if M._C.size and M._Cs.size:
+                Cs_new1, q_new1, ps_new1, sample_idx_new1 = C_prod_Cs(M, self, new_vars)
+                Cs_new2, q_new2, ps_new2, sample_idx_new2 = Cs_prod_Cs(
+                    M.Cs, self.Cs, M.variables, self.variables,
+                    M.q, self.q, M.ps, self.ps, M.sample_idx, self.sample_idx, new_vars)
+
+                Cs_new = np.vstack([Cs_new1, Cs_new2])
+                q_new = np.vstack([q_new1, q_new2])
+                ps_new = np.concatenate([ps_new1, ps_new2])
+                sample_idx_new = np.concatenate([sample_idx_new1, sample_idx_new2])
+
+                sort_idx = np.argsort(sample_idx_new.flatten())
+                Cs_new = Cs_new[sort_idx]
+                q_new = q_new[sort_idx]
+                ps_new = ps_new[sort_idx]
+
+                Mprod.Cs, Mprod.q = Cs_new, q_new
+                Mprod.ps, Mprod.sample_idx = ps_new, sample_idx_new
+
+            elif M._C.size:
+                Cs_new, q_new, ps_new, sample_idx_new = C_prod_Cs(M, self, new_vars)
+                Mprod.Cs, Mprod.q = Cs_new, q_new
+                Mprod.ps, Mprod.sample_idx = ps_new, sample_idx_new
+
+            elif M._Cs.size:
+                Cs_new, q_new, ps_new, sample_idx_new = Cs_prod_Cs(
+                    self.Cs, M.Cs, self.variables, M.variables,
+                    self.q, M.q, self.ps, M.ps, self.sample_idx, M.sample_idx, new_vars)
+
+                Mprod.Cs, Mprod.q, = Cs_new, q_new
+                Mprod.ps, Mprod.sample_idx = ps_new, sample_idx_new
+
+        if Mprod.Cs.size:
+            Mprod.Cs = Mprod.Cs.astype(int)
+
+        return  Mprod
+    
+    def _get_Cnew(self, M, new_vars):
+        """
+        For internal use in "product" method
+        """
+
+        new_vars_tf1, new_vars_idx1 = ismember( new_vars, self.variables )
+        new_vars_tf2, new_vars_idx2 = ismember( new_vars, M.variables )
+
+        n_row1 = len(self.C)
+        n_row2 = len(M.C)
+
+        Bst_dict = {}
+        for k, v in enumerate(new_vars):
+
+            if new_vars_tf1[k] and new_vars_tf2[k]: # common variable to product
+
+                n_val = len(v.values)
+
+                Bvec1 = np.zeros((n_row1, n_val), dtype=int)
+                Bvec2 = np.zeros((n_row2, n_val), dtype=int)
+
+                C1 = self.C[:, new_vars_idx1[k]]
+                for i, b in enumerate(C1):
+                    st = list( v.B[ b ] )
+                    Bvec1[i, st] = 1
+                Bvec1 = np.tile(Bvec1, (n_row2, 1, 1))
+
+                C2 = M.C[:, new_vars_idx2[k]]
+                for i, b in enumerate(C2):
+                    st = list( v.B[ b ] )
+                    Bvec2[i, st] = 1
+                Bvec2 = np.tile(Bvec2[:, np.newaxis, :], (1, n_row1, 1))
+
+                Bvec = Bvec1 * Bvec2
+                Bst = v.get_Bst_from_Bvec( Bvec )
+                
+                Bst_dict[v.name] = Bst
+
+            elif new_vars_tf1[k]: # it is in self only
+                C1 = self.C[:, new_vars_idx1[k]]
+                Bst = np.tile(C1.T, (n_row2, 1, 1))
+                Bst = np.squeeze(Bst)
+
+                Bst_dict[v.name] = Bst
+
+            else: # it is in M only
+                C2 = M.C[:, new_vars_idx2[k]]
+                Bst = np.repeat(C2.reshape(-1,1), n_row1, axis=1)
+
+                Bst_dict[v.name] = Bst
+
+        Cnew_list = []
+        for v in new_vars:
+            Cnew_list.append( Bst_dict[v.name].T.reshape(-1) )
+
+        # Cnew with -1
+        # -1 elements mean incompatible rows between the two CPMs
+        Cnew_with_minus1 = np.column_stack( Cnew_list ) 
+
+        return Cnew_with_minus1
+    
+    def _C_prod_C(self, M, new_vars):
+        """
+        For internal use in "product" method
+        """
+
+        new_vars_tf1, new_vars_idx1 = ismember( new_vars, self.variables )
+        new_vars_tf2, new_vars_idx2 = ismember( new_vars, M.variables )
+
+        n_row1 = len(self.C)
+        n_row2 = len(M.C)
+
+        Bst_dict = {}
+        for k, v in enumerate(new_vars):
+
+            if new_vars_tf1[k] and new_vars_tf2[k]: # common variable to product
+
+                n_val = len(v.values)
+
+                Bvec1 = np.zeros((n_row1, n_val), dtype=int)
+                Bvec2 = np.zeros((n_row2, n_val), dtype=int)
+
+                C1 = self.C[:, new_vars_idx1[k]]
+                for i, b in enumerate(C1):
+                    st = list( v.B[ b ] )
+                    Bvec1[i, st] = 1
+                Bvec1 = np.tile(Bvec1, (n_row2, 1, 1))
+
+                C2 = M.C[:, new_vars_idx2[k]]
+                for i, b in enumerate(C2):
+                    st = list( v.B[ b ] )
+                    Bvec2[i, st] = 1
+                Bvec2 = np.tile(Bvec2[:, np.newaxis, :], (1, n_row1, 1))
+
+                Bvec = Bvec1 * Bvec2
+                Bst = v.get_Bst_from_Bvec( Bvec )
+                
+                Bst_dict[v.name] = Bst
+
+            elif new_vars_tf1[k]: # it is in self only
+                C1 = self.C[:, new_vars_idx1[k]]
+                Bst = np.tile(C1.T, (n_row2, 1, 1))
+                Bst = np.squeeze(Bst)
+
+                Bst_dict[v.name] = Bst
+
+            else: # it is in M only
+                C2 = M.C[:, new_vars_idx2[k]]
+                Bst = np.repeat(C2.reshape(-1,1), n_row1, axis=1)
+
+                Bst_dict[v.name] = Bst
+
+        Cnew_list = []
+        for v in new_vars:
+            Cnew_list.append( Bst_dict[v.name].T.reshape(-1) )
+        Cnew = np.column_stack( Cnew_list )
+
+        pnew = np.repeat(self.p, n_row2) * np.tile(M.p, (n_row1, 1)).flatten()
+
+        mask = np.sum( Cnew < 0, axis=1 ) < 1
+
+        Cnew = Cnew[mask]
+        pnew = pnew[mask]
+
+        return Cnew, pnew
 
     def get_variables(self, item):
 
@@ -210,7 +498,7 @@ class Cpm(object):
         row_idx: array like
         flag: boolean
             default True, 0 if exclude row_idx
-        isCs: boolean
+        isC: boolean
             if True, C and p are reduced; if False, Cs, q, ps, sample_idx are.
         """
 
@@ -286,98 +574,27 @@ class Cpm(object):
         return [(self.C[:, i]*self.p[:, 0]).sum() for i in idx]
 
 
-    def iscompatible(self, M, flag=True):
+    def iscompatible(self, M, composite_state=True):
         """
         Returns a boolean list (n,)
 
         Parameters
         ----------
         M: instance of Cpm for compatibility check
-        flag: True if composite state considered
+        composite_state: False if the same rows are returned;
+            True if composite states and basic state can be
+            considered compatible if they are.
         """
 
         assert isinstance(M, Cpm), f'M should be an instance of Cpm'
 
         assert ( (M.C.shape[0] == 1) and (not M.Cs.size) ) or ( (M.Cs.shape[0] == 1) and (not M.C.size) ), 'C/Cs must be a single row'
 
-        if M.C.size:
+        if self.C.size and M.C.size:
+            is_cmp = iscompatible(self.C, self.variables, M.variables, M.C[0], composite_state)
 
-            _, idx = ismember(M.variables, self.variables)
-            check_vars = get_value_given_condn(M.variables, idx)
-            check_states = get_value_given_condn(M.C[0], idx)
-            idx = get_value_given_condn(idx, idx)
-
-            C = self.C[:, idx].copy()
-
-            is_cmp = np.ones(shape=C.shape[0], dtype=bool)
-
-            for i, (variable, state) in enumerate(zip(check_vars, check_states)):
-
-                if flag:
-                    B = variable.B
-                else:
-                    B = [{i} for i in range(np.max(C[:, i]) + 1)]
-
-                try:
-                    x1 = [B[int(k)] for k in C[is_cmp, i]]
-                except TypeError:
-                    x1 = [variable.B_fly(int(k)) for k in C[is_cmp, i]]
-                    check = [bool(variable.B_fly(state).intersection(x)) for x in x1]
-                else:
-                    check = [bool(B[state].intersection(x)) for x in x1]
-
-                is_cmp[np.where(is_cmp > 0)[0][:len(check)]] = check
-
-            #FIXME
-            """if self.Cs.size:
-                _, idx = ismember(M.variables, self.variables[:self.no_child])
-                check_vars = get_value_given_condn(M.variables, idx)
-                check_states = get_value_given_condn(M.C[0], idx)
-                idx = get_value_given_condn(idx, idx)
-
-                Cs = self.Cs[:, idx].copy()
-
-                is_cmp_Cs = np.ones(shape=C.shape[0], dtype=bool)
-
-                for i, (variable, state) in enumerate(zip(check_vars, check_states)):
-
-                    if flag:
-                        B = variable.B
-                    else:
-                        B = [{i} for i in range(np.max(Cs[:, i]) + 1)]
-
-                    x1 = [B[int(k)] for k in Cs[is_cmp_Cs, i]]
-                    check = [bool(B[state].intersection(x)) for x in x1]
-
-                    is_cmp_Cs[np.where(is_cmp_Cs > 0)[0][:len(check)]] = check
-
-                is_cmp = {'C': is_cmp_C, 'Cs': is_cmp_Cs}
-            else:
-                is_cmp = is_cmp_C"""
-
-        """if M.Cs.size: # Cs is not compared with other Cs but only with C.
-            _, idx = ismember(M.variables, self.variables)
-            check_vars = get_value_given_condn(M.variables, idx)
-            check_states = get_value_given_condn(M.C[0], idx)
-            idx = get_value_given_condn(idx, idx)
-
-            C = self.C[:, idx].copy()
-
-            is_cmp_C = np.ones(shape=C.shape[0], dtype=bool)
-
-            for i, (variable, state) in enumerate(zip(check_vars, check_states)):
-
-                if flag:
-                    B = variable.B
-                else:
-                    B = [{i} for i in range(np.max(C[:, i]) + 1)]
-
-                x1 = [B[int(k)] for k in C[is_cmp_C, i]]
-                check = [bool(B[state].intersection(x)) for x in x1]
-
-                is_cmp_C[np.where(is_cmp_C > 0)[0][:len(check)]] = check
-
-            is_cmp = is_cmp_C"""
+        else:
+            is_cmp = []
 
         return is_cmp
 
@@ -475,43 +692,33 @@ class Cpm(object):
         M = Cpm(variables=_variables,
                 C=self.C[:, vars_rem_idx],
                 no_child=len(vars_rem_idx),
-                p=self.p,
-                q=self.q,
-                sample_idx=self.sample_idx)
+                p = self.p)
 
-        Csum, psum, qsum, sample_idx_sum = [], [], [], []
+        Csum = np.array([], dtype=int).reshape(0, len(vars_rem))
+        psum = []
 
         while M.C.size:
 
-            Mc = M.get_subset([0]) # need to change to 0 
-            is_cmp = M.iscompatible(Mc, flag=False)
+            Mc = M.get_subset([0])
+            is_cmp = iscompatible(M.C, vars_rem, vars_rem, Mc.C, composite_state=False)
 
-            Csum.append(M.C[[0]])
+            Csum = np.vstack((Csum, Mc.C[0]))
 
             if M.p.size:
                 psum.append(np.sum(M.p[is_cmp]))
-
-            if M.q.size:
-                qsum.append(M.q[0])
-
-            if M.sample_idx.size:
-                sample_idx_sum.append(M.sample_idx[0])
 
             M = M.get_subset(np.where(is_cmp)[0], flag=0)
 
         Ms = Cpm(variables=vars_rem,
                  no_child=no_child_sum,
-                 C=np.reshape(Csum, (-1, M.C.shape[1])),
+                 C=Csum,
                  p=np.reshape(psum, (-1, 1)))
 
         if self.Cs.size:
-            lia, res = ismember(vars_rem, self.variables)
 
-            Cs = np.empty((len(self.Cs), len(vars_rem)), dtype=np.int32)
-            for i,r in enumerate(res):
-                Cs[:,i] = self.Cs[:,r]
+            Cs = self.Cs[:, vars_rem_idx].copy()
 
-            Ms.Cs = Cs.copy()
+            Ms.Cs = Cs.astype(int)
             Ms.q = self.q.copy()
             Ms.ps = self.ps.copy()
             Ms.sample_idx = self.sample_idx.copy()
@@ -618,186 +825,16 @@ class Cpm(object):
             Mx.p = Mx.p[is_cmp]
 
         if Mx.Cs.size: # NB: ps is not properly updated if the corresponding instance is not in C.
-            _, res = ismember(Mx.variables, cnd_vars)
 
-            if any(not isinstance(r,bool) for r in res[:Mx.no_child]): # conditioned variables belong to child nodes
-                ps = []
-                for c, q in zip(Mx.Cs, Mx.q):
-
-                    var_states = [cnd_states[r] if not isinstance(r,bool) else c[i] for i,r in enumerate(res)]
-                    pr = Mx.get_prob(Mx.variables, var_states)
-                    ps.append(pr*q[0])
-
-                Mx.ps = ps # the conditioned variables' samples are removed.
-
-            elif all(isinstance(r,bool) and r==False for r in res): # conditioned variables are not in the scope.
-                Mx.ps = Mx.q.copy()
-
-            else: # conditioned variables are in parent nodes.
-                ps = []
-
-                for c in Mx.Cs:
-                    var_states = [cnd_states[r] if not isinstance(r,bool) else c[i] for i,r in enumerate(res)]
-                    pr = Mx.get_prob(Mx.variables, var_states)
-                    ps.append(pr)
-
-                Mx.ps = ps
+            Cnew_with_minus1 = _get_Cnew(Mx.Cs, np.array([cnd_states]), Mx.variables, cnd_vars, Mx.variables)
+            
+            mask = np.sum( Cnew_with_minus1 < 0, axis=1 ) < 1
+            Cs_new, ps_new = Cnew_with_minus1[mask], Mx.ps[mask]
+            q_new, sample_idx_new = Mx.q[mask], Mx.sample_idx[mask]
+            
+            Mx.Cs, Mx.q, Mx.ps, Mx.sample_idx = Cs_new, q_new, ps_new, sample_idx_new
 
         return Mx
-
-
-    def product(self, M):
-        """
-        Returns an instance of Cpm
-        M: instance of Cpm
-        var: a dict of instances of Variable
-        """
-
-        assert isinstance(M, Cpm), f'M should be an instance of Cpm'
-
-        first = [x.name for x in self.variables[:self.no_child]]
-        second = [x.name for x in M.variables[:M.no_child]]
-        check = set(first).intersection(second)
-        assert not bool(check), f'PMFs must not have common child nodes: {first}, {second}'
-
-        if self.p.size:
-            if not M.p.size:
-                M.p = np.ones(shape=(M.C.shape[0], 1))
-        else:
-            if M.p.size:
-                self.p = np.ones(shape=(self.C.shape[0], 1))
-
-        """if self.q.size:
-            if not M.q.size:
-                M.q = np.ones(shape=(M.Cs.shape[0], 1))
-        else:
-            if M.q.size:
-                self.q = np.ones(shape=(self.Cs.shape[0], 1))"""
-
-        if self.C.size or self.Cs.size:
-            idx_vars, _ = ismember(self.variables, M.variables)
-            prod_vars = M.variables + get_value_given_condn(self.variables, flip(idx_vars))
-
-            new_child = self.variables[:self.no_child] + M.variables[:M.no_child]
-
-            new_parent = self.variables[self.no_child:] + M.variables[M.no_child:]
-            new_parent, _ = setdiff(new_parent, new_child)
-
-            if new_parent:
-                new_vars = new_child + new_parent
-            else:
-                new_vars = new_child
-            _, idx_vars2 = ismember(new_vars, prod_vars)
-
-            Mprod = Cpm(variables=new_vars,
-                        no_child = len(new_child))
-        else:
-            Mprod = M
-
-
-        if self.C.size:
-            new_vars_tf1, new_vars_idx1 = ismember( new_vars, self.variables )
-            new_vars_tf2, new_vars_idx2 = ismember( new_vars, M.variables )
-
-            n_row1 = len(self.C)
-            n_row2 = len(M.C)
-
-            Bst_dict = {}
-            for k, v in enumerate(new_vars):
-
-                if new_vars_tf1[k] and new_vars_tf2[k]: # common variable to product
-
-                    n_val = len(v.values)
-
-                    Bvec1 = np.zeros((n_row1, n_val), dtype=int)
-                    Bvec2 = np.zeros((n_row2, n_val), dtype=int)
-
-                    C1 = self.C[:, new_vars_idx1[k]]
-                    for i, b in enumerate(C1):
-                        st = list( v.B[ b ] )
-                        Bvec1[i, st] = 1
-                    Bvec1 = np.tile(Bvec1, (n_row2, 1, 1))
-
-                    C2 = M.C[:, new_vars_idx2[k]]
-                    for i, b in enumerate(C2):
-                        st = list( v.B[ b ] )
-                        Bvec2[i, st] = 1
-                    Bvec2 = np.tile(Bvec2[:, np.newaxis, :], (1, n_row1, 1))
-
-                    Bvec = Bvec1 * Bvec2
-                    Bst = v.get_Bst_from_Bvec( Bvec )
-                    
-                    Bst_dict[v.name] = Bst
-
-                elif new_vars_tf1[k]: # it is in self only
-
-                    C1 = self.C[:, new_vars_idx1[k]]
-                    Bst = np.tile(C1.T, (n_row2, 1, 1))
-                    Bst = np.squeeze(Bst)
-
-                    Bst_dict[v.name] = Bst
-
-                else: # it is in M only
-
-                    C2 = M.C[:, new_vars_idx2[k]]
-                    Bst = np.repeat(C2.reshape(-1,1), n_row1, axis=1)
-
-                    Bst_dict[v.name] = Bst
-
-            Cnew_list = []
-            for v in new_vars:
-                Cnew_list.append( Bst_dict[v.name].T.reshape(-1) )
-            Cnew = np.column_stack( Cnew_list )
-
-            pnew = np.repeat(self.p, n_row2) * np.tile(M.p, (n_row1, 1)).flatten()
-
-            mask = np.sum( Cnew < 0, axis=1 ) < 1
-
-            Cnew = Cnew[mask]
-            pnew = pnew[mask]
-
-        Mprod.C = Cnew
-        Mprod.p = pnew
-
-
-        if self.Cs.size and M.Cs.size:
-            Csprod, qprod, psprod, sample_idx_prod = [], [], [], []
-
-            self.q = np.prod(self.q, axis=1)
-            M.q = np.prod(M.q, axis = 1)
-            if self.ps.size:
-                self.ps = np.prod(self.ps, axis=1)
-            else:
-                self.ps = self.q.copy()
-            if M.ps.size:
-                M.ps = np.prod(M.ps, axis=1)
-            else:
-                M.ps = M.q.copy()
-
-            for i in range(self.Cs.shape[0]):
-
-                #c1 = get_value_given_condn(self.Cs[i, :], idx_vars)
-                c1_not_com = self.Cs[i, flip(idx_vars)]
-
-                M_idx = np.where(M.sample_idx==self.sample_idx[i][0])[0]
-                c2 = M.Cs[M_idx,:][0]
-
-                _csprod = np.concatenate((c2, c1_not_com), axis = 0 )
-                Csprod.append([_csprod])
-
-                qprod.append(get_prod(M.q[M_idx], self.q[i]))
-                psprod.append(get_prod(M.ps[M_idx], self.ps[i]))
-
-            Csprod = np.concatenate(Csprod, axis=0)
-            psprod = np.concatenate(psprod, axis=0)
-            qprod = np.concatenate(qprod, axis=0)
-
-            Mprod.Cs = Csprod[:, idx_vars2].astype(int)
-            Mprod.q = qprod
-            Mprod.ps = psprod
-            Mprod.sample_idx = self.sample_idx.copy()
-
-        return  Mprod
 
 
     def sort(self):
@@ -975,6 +1012,171 @@ class Cpm(object):
         cov = std/prob
 
         return prob, cov, cint
+    
+def C_prod_C(M1, M2, new_vars):
+    """
+    Product of two C matrices (i.e. not Cs matrices)
+    """
+    Cnew_with_minus1 = _get_Cnew(M1.C, M2.C, M1.variables, M2.variables, new_vars)
+
+    n_row1, n_row2 = len(M1.C), len(M2.C)
+    pnew = np.repeat(M1.p, n_row2) * np.tile(M2.p, (n_row1, 1)).flatten()
+
+    mask = np.sum( Cnew_with_minus1 < 0, axis=1 ) < 1
+    Cnew, pnew = Cnew_with_minus1[mask], pnew[mask]
+
+    return Cnew, pnew
+
+def C_prod_Cs(M1, M2, new_vars):
+    """
+    Product of C (M1) and Cs (M2) matrices
+    """
+    Cnew_with_minus1 = _get_Cnew(M1.C, M2.Cs, M1.variables, M2.variables, new_vars)
+
+    n_row1, n_row2 = len(M1.C), len(M2.Cs)
+    ps_new = np.repeat(M1.p, n_row2) * np.tile(M2.ps, (n_row1, 1)).flatten()
+    sample_idx_new = np.tile(M2.sample_idx, (n_row1, 1))
+    q_new = np.repeat(M1.p, n_row2) * np.tile(M2.q, (n_row1, 1)).flatten()
+
+    mask = np.sum( Cnew_with_minus1 < 0, axis=1 ) < 1
+    Cs_new, ps_new = Cnew_with_minus1[mask], ps_new[mask]
+    q_new, sample_idx_new = q_new[mask], sample_idx_new[mask]
+
+    # Sort rows by sample_idx for readability
+    sorted_idx = np.argsort(sample_idx_new.flatten())
+    Cs_new, q_new = Cs_new[sorted_idx], q_new[sorted_idx]
+    ps_new, sample_idx_new = ps_new[sorted_idx], sample_idx_new[sorted_idx]
+
+    return Cs_new, q_new, ps_new, sample_idx_new
+
+def Cs_prod_Cs(Cs1, Cs2, vars1, vars2, q1, q2, ps1, ps2, sample_idx1, sample_idx2, new_vars):
+    """
+    Product of two Cs matrices
+    """
+
+    # Give warnings if there is a mismatch in sample indices between Cs1 and Cs2
+    # Mismatching indices will be ignored
+    unique_sidx_M1 = np.unique(sample_idx1)
+    unique_sidx_M2 = np.unique(sample_idx1)
+
+    only_in_M1 = unique_sidx_M1 - unique_sidx_M2
+    only_in_M2 = unique_sidx_M2 - unique_sidx_M1
+
+    if only_in_M1.size or only_in_M2.size:
+        warnings.warn(
+            f"Mismatch in unique sample indices between M1 and M2.\n"
+            f"Indices only in M1: {sorted(only_in_M1)}\n"
+            f"Indices only in M2: {sorted(only_in_M2)}",
+            UserWarning
+        )
+
+    new_vars_tf1, new_vars_idx1 = ismember( new_vars, vars1 )
+    new_vars_tf2, new_vars_idx2 = ismember( new_vars, vars2 )    
+
+    # Common variables
+    com_vars_idx1, com_vars_idx2 = [], []
+    for tf1, tf2, idx1, idx2 in zip(new_vars_tf1, new_vars_tf2, new_vars_idx1, new_vars_idx2):
+        if tf1 and tf2:
+            com_vars_idx1.append(idx1)
+            com_vars_idx2.append(idx2)
+
+    Cs_new = np.array([], dtype=int).reshape(0, len(new_vars))
+    qs_new = np.array([])
+    ps_new = np.array([])
+    sample_idx_new = np.array([])
+
+    # Mapping Cs_new's columns to Cs1's and Cs2's columns
+    # Cs_col_map[0] is the index of Cs1's columns
+    # Cs_col_map[1] is the index of Cs2's columns
+    Cs_col_map = [[], []]
+    for i, (tf1, tf2, idx1, idx2) in enumerate(zip(new_vars_tf1, new_vars_tf2, new_vars_idx1, new_vars_idx2)):
+        if tf1:
+            Cs_col_map[0].append([i, idx1])
+        elif tf2:
+            Cs_col_map[1].append([i, idx2])
+
+    for c1, q1, ps1, sidx1 in zip(Cs1, q1, ps1, sample_idx1):
+        row_idx2 = np.where(sample_idx2 == sidx1)[0]
+
+        for i2 in row_idx2:
+            if Cs2[i2][com_vars_idx2] == c1[com_vars_idx1]:
+                cs_new = np.zeros((1, len(new_vars)))
+                for i, idx in Cs_col_map[0]:
+                    cs_new[0, i] = c1[idx]
+                for i, idx in Cs_col_map[1]:
+                    cs_new[0, i] = Cs2[i2][idx]
+
+                Cs_new = np.vstack([Cs_new, cs_new])    
+                qs_new = np.append(qs_new, q1*q2[i2])
+                ps_new = np.append(ps_new, ps1*ps2[i2])
+                sample_idx_new = np.append(sample_idx_new, sidx1)
+
+    Cs_new.astype(int)
+    sample_idx_new.astype(int)
+
+    return Cs_new, qs_new, ps_new, sample_idx_new
+
+
+def _get_Cnew(C1, C2, vars1, vars2, new_vars):
+    """
+    For internal use in "product" method
+    """
+
+    new_vars_tf1, new_vars_idx1 = ismember( new_vars, vars1 )
+    new_vars_tf2, new_vars_idx2 = ismember( new_vars, vars2 )
+
+    n_row1 = len(C1)
+    n_row2 = len(C2)
+
+    Bst_dict = {}
+    for k, v in enumerate(new_vars):
+
+        if new_vars_tf1[k] and new_vars_tf2[k]: # common variable to product
+
+            n_val = len(v.values)
+
+            Bvec1 = np.zeros((n_row1, n_val), dtype=int)
+            Bvec2 = np.zeros((n_row2, n_val), dtype=int)
+
+            C1_ = C1[:, new_vars_idx1[k]]
+            for i, b in enumerate(C1_):
+                st = list( v.get_set(b) )
+                Bvec1[i, st] = 1
+            Bvec1 = np.tile(Bvec1, (n_row2, 1, 1))
+
+            C2_ = C2[:, new_vars_idx2[k]]
+            for i, b in enumerate(C2_):
+                st = list( v.get_set(b) )
+                Bvec2[i, st] = 1
+            Bvec2 = np.tile(Bvec2[:, np.newaxis, :], (1, n_row1, 1))
+
+            Bvec = Bvec1 * Bvec2
+            Bst = v.get_Bst_from_Bvec( Bvec )
+            
+            Bst_dict[v.name] = Bst
+
+        elif new_vars_tf1[k]: # it is in self only
+            C1_ = C1[:, new_vars_idx1[k]]
+            Bst = np.tile(C1_.T, (n_row2, 1, 1))
+            Bst = np.squeeze(Bst)
+
+            Bst_dict[v.name] = Bst
+
+        else: # it is in M only
+            C2_ = C2[:, new_vars_idx2[k]]
+            Bst = np.repeat(C2_.reshape(-1,1), n_row1, axis=1)
+
+            Bst_dict[v.name] = Bst
+
+    Cnew_list = []
+    for v in new_vars:
+        Cnew_list.append( Bst_dict[v.name].T.reshape(-1) )
+
+    # Cnew with -1
+    # -1 elements mean incompatible rows between the two CPMs
+    Cnew_with_minus1 = np.column_stack( Cnew_list ) 
+
+    return Cnew_with_minus1
 
 
 def argsort(seq):
@@ -1049,7 +1251,7 @@ def get_value_given_condn(A, condn):
     return val
 
 
-def iscompatible(C, variables, check_vars, check_states):
+def iscompatible(C, variables, check_vars, check_states, composite_state=False):
     """
     Returns a boolean list
 
@@ -1059,44 +1261,36 @@ def iscompatible(C, variables, check_vars, check_states):
     variables: array_like
     check_vars: array_like list of Variable or string
     check_sates: array_like list of index or string
-    var: dict of instance of Variable
+    composite_state: False if the same rows are returned;
+        True if composite states and basic state can be
+        considered compatible if they are. 
     """
     if check_vars and isinstance(check_vars[0], str):
         check_vars = [x for y in check_vars for x in variables if x.name == y]
 
     _, idx = ismember(check_vars, variables)
     check_vars = get_value_given_condn(check_vars, idx)
-    check_states = get_value_given_condn(check_states, idx)
-    idx = get_value_given_condn(idx, idx)
 
-    C = C[:, idx].copy()
+    if len(check_vars) > 0:
+        check_states = get_value_given_condn(check_states, idx)
+        idx = get_value_given_condn(idx, idx)
 
-    is_cmp = np.ones(shape=C.shape[0], dtype=bool)
+        C = C[:, idx].copy()
 
-    for i, (variable, state) in enumerate(zip(check_vars, check_states)):
+        for i, (variable, state) in enumerate(zip(check_vars, check_states)):
 
-        if isinstance(state, str):
-            state = variable.values.index(state)
+            if isinstance(state, str):
+                state = variable.values.index(state)
+                check_states[i] = state
 
-        try:
-            B = variable.B
-        except NameError:
-            print(f'{variable} is not defined')
+        if not composite_state:
+            is_cmp = np.all(C == check_states, axis=1).tolist()
 
-        try:
-            x1 = [B[int(k)] for k in C[is_cmp, i]]
-        except TypeError:
-            x1 = [variable.B_fly(int(k)) for k in C[is_cmp, i]]
-
-        try:
-            check = [bool(B[state].intersection(x)) for x in x1]
-        except IndexError:
-            print('IndexError: {state}')
-        except TypeError:
-            check = [bool(variable.B_fly(state).intersection(x)) for x in x1]
-            is_cmp[np.where(is_cmp > 0)[0][:len(check)]] = check
         else:
-            is_cmp[np.where(is_cmp > 0)[0][:len(check)]] = check
+            Cnew_with_minus1 = _get_Cnew(C, np.array([check_states]), check_vars, check_vars, check_vars)
+            is_cmp = np.all(Cnew_with_minus1 >= 0, axis=1).tolist()
+    else:
+        is_cmp = np.ones(shape=C.shape[0], dtype=bool).tolist()
 
     return is_cmp
 

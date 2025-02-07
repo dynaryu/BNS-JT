@@ -1,164 +1,194 @@
 import numpy as np
 from itertools import chain, combinations
-import math
-
-#from collections import namedtuple
-#from typing import NamedTuple
-
-"""
-BaseVariable = namedtuple('BaseVariable', [
-    'name',
-    'B',
-    'values'
-    ])
-
-class Variable(BaseVariable):
-    '''
-    A namedtuple subclass to hold Variable
-
-    name: str
-    B: basis set
-    values: description of states
-
-    B may be replaced by a dictionary something like "numBasicState = 3" and "compositeState = {'4':['1','2'], '5':['1','3'], '6': ['1','2','3']}"
-    (A user does not have to enter composite states for all possible permutations but is enough define those being used).
-    '''
-    __slots__ = ()
-    def __new__(cls, name, B, values):
-
-        assert isinstance(name, str), 'name should be a string'
-
-        assert isinstance(B, (np.ndarray, list)), 'B must be a array'
-
-        if isinstance(B, list):
-            B = np.array(B, dtype=int)
-
-        if B.dtype == np.dtype(np.float64):
-            B = B.astype(int)
-
-        assert isinstance(values, list), 'values must be a list'
-
-        numBasicState = B.shape[1]
-
-        assert (B[:numBasicState, :] == np.eye(numBasicState)).all(), 'The upper part corresponding to basic states must form an identity matrix'
-
-        return super(Variable, cls).__new__(cls, name, B, values)
-
-    def B_times_values(self):
-
-        return [' '.join(x).strip(' ') for x in np.char.multiply(self.values, self.B.astype(int)).tolist()]
-
-    def __hash__(self):
-
-        return hash(self.name)
-
-
-    def __eq__(self, other):
-
-        return self.name == other.name
-
-    def __repr__(self):
-        return repr(f'Variable(name={self.name}, B={self.B}, values={self.values})')
-"""
 
 class Variable(object):
+    '''A class to manage information of a variable.
+    
+    Attributes:
+        name (str): name of the variable.
+        values (list): description of states.
+        B (list):
+            Mapping matrix from basic states (columns)
+            to composite states (rows).
+            This matrix is automatically generated.
+
+    Notes:
+        How to read the mapping matrix:
+            Each row in the matrix represents a composite state.
+            Each column represents a basic state.
+
+            Example: with 3 basic states, the mapping matrix is:
+                [[1, 0, 0],
+                 [0, 1, 0],
+                 [0, 0, 1],
+                 [1, 1, 0],
+                 [1, 0, 1],
+                 [0, 1, 1],
+                 [1, 1, 1]]
+            The first row [1, 0, 0] means that State 0 represents
+            the random variable of being in State 0.
+            The sixth row [0, 1, 1] means that State 5 represents
+            the random variable of being in State 1 or State 2.
+            The seventh row [1, 1, 1] means that State 6 represents
+            the random variable of being in State 0, 1, or 2.
+
+        Best practice to set values:
+            When applicable, lower states represent worse outcomes.
+            Example: ['failure', 'survival'] since 0 < 1.
     '''
-    A namedtuple subclass to hold Variable
 
-    name: str
-    B: basis set
-    values: description of states
-
-    B may be replaced by a dictionary something like "numBasicState = 3" and "compositeState = {'4':['1','2'], '5':['1','3'], '6': ['1','2','3']}"
-    (A user does not have to enter composite states for all possible permutations but is enough define those being used).
-    '''
-
-    def __init__(self, name, values=[], B_flag=None):
-
+    def __init__(self, name, values=[], B_flag='auto'):
+        '''Initialize the Variable object.
+        
+        Args:
+            name (str): name of the variable.
+            values (list or np.ndarray): description of states.
+            B_flag (str): flag to determine how B is generated.
+        '''
         assert isinstance(name, str), 'name should be a string'
+        assert isinstance(values, (list, np.ndarray)), \
+            'values must be a list or np.ndarray'
+        assert B_flag in ['auto', 'store', 'fly'], \
+            'B_flag must be either auto, store, or fly'
 
-        assert isinstance(values, list), 'values must be a list'
+        self._name = name
+        self._values = values
+        self._B_flag = B_flag
 
-        self.name = name
-        self.values = values
-        self.B_flag = B_flag
+        if len(self.values) > 0:
+            if B_flag == 'fly':
+                self._B = None
+            elif B_flag == 'store':
+                self._B = self.gen_B()
+            elif B_flag == 'auto':
+                if len(self.values) <= 6:
+                    self._B = self.gen_B()
+                else:
+                    self._B = None
+        else:
+            self._B = None
 
-        self.B = None
-        if len(self.values) > 0 and ((len(self.values) <= 6 and B_flag != 'fly') or B_flag=='store'):
-            self.B = self.gen_B()
+    # Magic methods
+    def __hash__(self):
+        return hash(self._name)
 
+    def __lt__(self, other):
+        return self._name < other.name
+
+    def __eq__(self, other):
+        if isinstance(other, Variable):
+            return self._name == other._name and self._values == other._values
+        else:
+            return False
+
+    def __repr__(self):
+        if self._B is None:
+            return repr(f'Variable(name={self._name}, values={self._values}, B_flag={self._B_flag})')
+        else:
+            return repr(f'Variable(name={self._name}, values={self._values}, B={self._B})')
+
+    # Property for 'name'
     @property
-    def B(self):
-        return self._B
+    def name(self):
+        return self._name
+    
+    @name.setter
+    def name(self, new_name):
+        assert isinstance(new_name, str), 'name must be a string'
+        self._name = new_name
 
-    @B.setter
-    def B(self, value):
-        self._B = value
-
+    # Property for 'values'
     @property
     def values(self):
         return self._values
 
     @values.setter
-    def values(self, values):
+    def values(self, new_values):
+        assert isinstance(new_values, list), 'values must be a list'
+        self._values = new_values
+        self.update_B()
 
-        assert isinstance(values, list), 'values must be a list'
-
-        self._values = values
-
-        #self._B = self.gen_B()
-
+    # Property for 'B_flag'
     @property
     def B_flag(self):
         return self._B_flag
 
     @B_flag.setter
-    def B_flag(self, value):
+    def B_flag(self, new_B_flag):
+        assert new_B_flag in ['auto', 'store', 'fly'], \
+            'B_flag must be either auto, store, or fly'
+        self._B_flag = new_B_flag
+        self.update_B()
 
-        assert value in [None, 'store', 'fly'], 'B_flag must be either None, store, or fly'
-        self._B_flag = value
-
+    # Method to generate the mapping matrix
     def gen_B(self):
         n = len(self._values)
-        B = [set(x) for x in chain.from_iterable(combinations(range(n), r) for r in range(1, n + 1))]
-        #for n in range(1, len(self._values) + 1):
-        #    [B.append(set(x)) for x in itertools.combinations(range(len(self._values)), n)]
+        B = [
+            set(x)
+            for x in chain.from_iterable(
+                combinations(range(n), r) for r in range(1, n+1)
+            )
+        ]
         return B
-            
-    def get_state( self, set ):
-        """
-        Finds the state of a given set of basic states.
+    
+    # Method to update the mapping matrix
+    def update_B(self):
+        if len(self._values) > 0:
+            if self._B_flag == 'store':
+                self._B = self.gen_B()
+            elif self._B_flag == 'fly':
+                self._B = None
+            elif self._B_flag == 'auto':
+                if len(self._values) <= 6:
+                    self._B = self.gen_B()
+                else:
+                    self._B = None
+        else:
+            self._B = None
 
-        The sets are ordered as follows:
-        [{0}, {1}, ..., {n-1}, {0, 1}, {0, 2}, ..., {n-2, n-1}, {0, 1, 2}, ..., {0, 1, ..., n-1}]
+    # Property for 'B'
+    @property
+    def B(self):
+        return self._B
+                    
+    
+    def get_state(self, state_set):
+        '''Finds the state index of a given set of basic states.
 
-        Parameters:
-        set (set): The set of basic states for which to find the state.
+        The sets are ordered as follows (cf. gen_B):
+        [{0}, {1}, ..., {n-1}, {0, 1}, {0, 2}, ..., {n-2, n-1},
+        {0, 1, 2}, ..., {0, 1, ..., n-1}]
+
+        Args:
+            state_set (set): set of basic states.
 
         Returns:
-        state: The state of the given set in the custom order.
-        """
-        if self.B is not None:
-            state = self.B.index(set)
+            state (int): state index in B matrix of the given set.
+        '''
+        assert isinstance(state_set, set), 'set must be a set'
 
+        if self.B is not None:
+            # Find the index directly from B
+            state = self.B.index(state_set)
         else:
-            n = len(self.values)
+            # Find the index by calculation
             # The number of elements in the target set
-            num_elements = len(set)
+            num_elements = len(state_set)
+            # Number of basic states
+            n = len(self.values)
             
             # Initialize the state
             state = 0
-
             # Add the number of sets with fewer elements
             for k in range(1, num_elements):
                 state += len(list(combinations(range(n), k)))
-
-            # Now, find where the target set is in the group with 'num_elements' elements
+            # Find where the target set is in the group
+            # with 'num_elements' elements
             combinations_list = list(combinations(range(n), num_elements))
             
-            # Convert target_set to a sorted tuple to match the combinations
-            target_tuple = tuple(sorted(set))
-            
+            # Convert target_set to a sorted tuple
+            # to match the combinations
+            target_tuple = tuple(sorted(state_set))
             # Find the index within the group
             idx_in_group = combinations_list.index(target_tuple)
 
@@ -168,37 +198,38 @@ class Variable(object):
         return state
     
     def get_set(self, state):
-        """
-        Finds the set of basic states corresponding to a given basic/composite state.
+        '''Finds the set of basic states represented by a given state index.
 
-        The sets are ordered as follows:
-        [{0}, {1}, ..., {n-1}, {0, 1}, {0, 2}, ..., {n-2, n-1}, {0, 1, 2}, ..., {0, 1, ..., n-1}]
+        The sets are ordered as follows (cf. gen_B):
+        [{0}, {1}, ..., {n-1}, {0, 1}, {0, 2}, ..., {n-2, n-1},
+        {0, 1, 2}, ..., {0, 1, ..., n-1}]
 
-        Parameters:
-        state (int): The state for which to find the corresponding set.
+        Args:
+            state (int): state index.
 
         Returns:
-        set: The set corresponding to the given state.
-        """
+            set (set): set of basic states.
+        '''
+        assert np.issubdtype(type(state), np.integer), 'state must be an integer'
 
         if self.B is not None:
             return self.B[state]
-        
         else:
             # the number of states
             n = len(self.values)
-
             # Initialize the state tracker
             current_state = 0
 
-            # Iterate through the group sizes (1-element sets, 2-element sets, etc.)
-            for k in range(1, n + 1):
+            # Iterate through the group sizes
+            # (1-element sets, 2-element sets, etc.)
+            for k in range(1, n+1):
                 # Count the number of sets of size k
                 comb_count = len(list(combinations(range(n), k)))
 
                 # Check if the index falls within this group
                 if current_state + comb_count > state:
-                    # If it falls within this group, calculate the exact set
+                    # If it falls within this group,
+                    # calculate the exact set
                     combinations_list = list(combinations(range(n), k))
                     set_tuple = combinations_list[state - current_state]
                     return set(set_tuple)
@@ -207,37 +238,43 @@ class Variable(object):
                 current_state += comb_count
 
             # If the index is out of bounds, raise an error
-            raise IndexError("Index out of bounds for the given set size.")
+            raise IndexError(f"The given state index must be not greater than {2**n-1}")
         
     
-    def find_state_from_vector(self, vector):
-        """
-        Finds the state of a given binary vector.
+    def get_state_from_vector(self, vector):
+        '''Finds the state index for a given binary vector.
 
-        Parameters:
-        vector (list): The binary vector indicating the basic states involved, for which to find the state.
+        Args:
+            vector (list or np.ndarray): binary vector.
+            1 if the basic state is involved, 0 otherwise.
 
         Returns:
-        state: The state of the given vector in the custom order. Returns -1 if the vector is all zeros.
-        """
+            state (int): state index.
+            -1 if the vector is all zeros.
+        '''
+        assert isinstance(vector, (list, np.ndarray)), \
+            'vector must be a list or np.ndarray'
+        assert len(vector) == len(self.values), \
+            'vector must have the same length as values'
+
         # Count the number of 1's in the vector
-        n = len(vector)
         num_ones = sum(vector)
 
         # Return -1 if the vector is all zeros
         if num_ones == 0:
             return -1
         
+        # Number of basic states
+        n = len(vector)
+
         # Initialize the state
-        state = 0
-        
+        state = 0        
         # Add the number of vectors with fewer 1's
         for k in range(1, num_ones):
             state += len(list(combinations(range(n), k)))
         
         # Find where this vector is in the group with 'num_ones' ones
         one_positions = [i for i, val in enumerate(vector) if val == 1]
-        
         # Find the position of this specific combination in the group
         combs = list(combinations(range(n), num_ones))
         idx_in_group = combs.index(tuple(one_positions))
@@ -248,93 +285,22 @@ class Variable(object):
         return state
     
     def get_Bst_from_Bvec( self, Bvec ):
+        '''Converts a binary vector into its corresponding state index.
 
-        """
-        Converts a binary vector (Bvec) into its corresponding state representation (Bst)
-        by applying the 'find_state_from_vector' function along the last axis of the Bvec array.
-
-        Parameters:
-        ----------
-        Bvec : np.ndarray
-            A (x*y*z) numpy array where z is the number of basic states.
+        Args:
+           Bvec (np.ndarray): (x*y*z) binary array.
+           x is the number of instances for the first Cpm object.
+           y is the number of instances for the second Cpm object.
+           z is the number of basic states.
 
         Returns:
-        -------
-        Bst : np.ndarray
-            A (x*y) numpy array containing the state representation of each binary vector 
-            in the original Bvec array.
-        """
-
-        Bst = np.apply_along_axis(self.find_state_from_vector, -1, Bvec)
+            Bst (np.ndarray): (x*y) integer array.
+            Each element represents the state index of
+            the corresponding binary vector in Bvec.
+        '''
+        Bst = np.apply_along_axis(self.get_state_from_vector, -1, Bvec)
         return Bst
 
 
-    def update_B(self, val=None):
-        if val:
-            self.B = val
-        else:
-            if len(self.values) > 0 and ((len(self.values) <= 6 and self.B_flag!='fly') or self.B_flag=='store'):
-                self.B = self.gen_B()
-            else:
-                self.B = None
-
-
-    """
-    def B_times_values(self):
-
-        return [' '.join(x).strip(' ') for x in np.char.multiply(self.values, self.B.astype(int)).tolist()]
-    """
-
-
-    #    self.check_B(value)
-    #    self._B = value
-    """
-    def check_B(self, value):
-
-        assert isinstance(value, list), 'B must be a list'
-        assert len(value) >= len(self.values), 'B contains index or indices of the value'
-        assert len(value) <= 2**len(self.values) - 1, f'Length of B can not exceed {2**len(self.values)-1}: {value}, {self.values}'
-        assert all([max(v) < len(self.values) for v in value]), 'B contains index or indices of the value'
-        assert all([isinstance(v, set) for v in value]), 'B consists of set'
-    """
-
-    def __hash__(self):
-
-        return hash(self.name)
-
-    def __lt__(self, other):
-
-        return self.name < other.name
-
-    def __eq__(self, other):
-
-        try:
-            return self.name == other.name
-        except AttributeError:
-            return self.name == other
-
-    def __repr__(self):
-        return repr(f'Variable(name={self.name}, B={self.B}, values={self.values})')
-
-
-def get_composite_state(vari, states):
-    """
-    # Input: vari-one Variable object, st_list: list of states (starting from zero)
-    # TODO: states start from 0 in Cpm and from 1 in B&B -- will be fixed later so that all start from 0
-    b = [x in states for x in range(len(vari.B[0]))]
-    comp_st = np.where((vari.B == b).all(axis=1))[0]
-    if len(comp_st):
-        cst = comp_st[0]
-    else:
-        vari.B = np.vstack((vari.B, b))
-        cst = len(vari.B) - 1 # zero-based index
-    """
-    added = set(states)
-    if added not in vari.B:
-        vari.B.append(added)
-
-    cst = vari.B.index(added)
-
-    return vari, cst
 
 

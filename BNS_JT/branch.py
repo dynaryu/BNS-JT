@@ -790,6 +790,7 @@ def branch_and_bound_org(bstars, path_time_idx, arc_cond):
     return sb_saved
 
 
+
 def get_cmat_from_branches(branches, variables):
     """
     branches: list of tuples (lower, upper, fl, fu)
