@@ -210,7 +210,7 @@ class Variable(object):
         Returns:
             set (set): set of basic states.
         '''
-        assert isinstance(state, int), 'state must be an integer'
+        assert np.issubdtype(type(state), np.integer), 'state must be an integer'
 
         if self.B is not None:
             return self.B[state]

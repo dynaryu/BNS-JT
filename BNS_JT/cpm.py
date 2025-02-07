@@ -276,6 +276,16 @@ class Cpm(object):
 
                     Mprod.Cs, Mprod.q = Cs_new, q_new
                     Mprod.ps, Mprod.sample_idx = ps_new, sample_idx_new
+
+                elif M._Cs.size and not self._Cs.size:
+                    Cs_new, q_new, ps_new, sample_idx_new = C_prod_Cs(self, M, new_vars)
+                    Mprod.Cs, Mprod.q = Cs_new, q_new
+                    Mprod.ps, Mprod.sample_idx = ps_new, sample_idx_new
+
+                elif self._Cs.size and not M._Cs.size:
+                    Cs_new, q_new, ps_new, sample_idx_new = C_prod_Cs(M, self, new_vars)
+                    Mprod.Cs, Mprod.q = Cs_new, q_new
+                    Mprod.ps, Mprod.sample_idx = ps_new, sample_idx_new
             
             elif M._Cs.size and not self._Cs.size:
                 Cs_new, q_new, ps_new, sample_idx_new = C_prod_Cs(self, M, new_vars)
@@ -289,18 +299,19 @@ class Cpm(object):
                     self.q, M.q, self.ps, M.ps, self.sample_idx, M.sample_idx, new_vars)
 
                 Cs_new = np.vstack([Cs_new1, Cs_new2])
-                q_new = np.vstack([q_new1, q_new2])
+                q_new = np.concatenate([q_new1, q_new2])
                 ps_new = np.concatenate([ps_new1, ps_new2])
-                sample_idx_new = np.concatenate([sample_idx_new1, sample_idx_new2])
+                sample_idx_new = np.concatenate([sample_idx_new1.flatten(), sample_idx_new2.flatten()])
 
                 # Sort all sample arrays based on sample_idx
-                sort_idx = np.argsort(sample_idx_new.flatten())
+                sort_idx = np.argsort(sample_idx_new)
                 Cs_new = Cs_new[sort_idx]
                 q_new = q_new[sort_idx]
                 ps_new = ps_new[sort_idx]
+                sample_idx_new = sample_idx_new[sort_idx]
 
-                Mprod.Cs, Mprod.q, = Cs_new, q_new
-                Mprod.ps, Mprod.sample_idx = ps_new, sample_idx_new
+                Mprod.Cs, Mprod.q, = Cs_new.astype(int), q_new
+                Mprod.ps, Mprod.sample_idx = ps_new, sample_idx_new.astype(int)
 
         else:
             if M._C.size and M._Cs.size:
@@ -334,6 +345,9 @@ class Cpm(object):
 
                 Mprod.Cs, Mprod.q, = Cs_new, q_new
                 Mprod.ps, Mprod.sample_idx = ps_new, sample_idx_new
+
+        if Mprod.Cs.size:
+            Mprod.Cs = Mprod.Cs.astype(int)
 
         return  Mprod
     
@@ -484,7 +498,7 @@ class Cpm(object):
         row_idx: array like
         flag: boolean
             default True, 0 if exclude row_idx
-        isCs: boolean
+        isC: boolean
             if True, C and p are reduced; if False, Cs, q, ps, sample_idx are.
         """
 
@@ -560,98 +574,27 @@ class Cpm(object):
         return [(self.C[:, i]*self.p[:, 0]).sum() for i in idx]
 
 
-    def iscompatible(self, M, flag=True):
+    def iscompatible(self, M, composite_state=True):
         """
         Returns a boolean list (n,)
 
         Parameters
         ----------
         M: instance of Cpm for compatibility check
-        flag: True if composite state considered
+        composite_state: False if the same rows are returned;
+            True if composite states and basic state can be
+            considered compatible if they are.
         """
 
         assert isinstance(M, Cpm), f'M should be an instance of Cpm'
 
         assert ( (M.C.shape[0] == 1) and (not M.Cs.size) ) or ( (M.Cs.shape[0] == 1) and (not M.C.size) ), 'C/Cs must be a single row'
 
-        if M.C.size:
+        if self.C.size and M.C.size:
+            is_cmp = iscompatible(self.C, self.variables, M.variables, M.C[0], composite_state)
 
-            _, idx = ismember(M.variables, self.variables)
-            check_vars = get_value_given_condn(M.variables, idx)
-            check_states = get_value_given_condn(M.C[0], idx)
-            idx = get_value_given_condn(idx, idx)
-
-            C = self.C[:, idx].copy()
-
-            is_cmp = np.ones(shape=C.shape[0], dtype=bool)
-
-            for i, (variable, state) in enumerate(zip(check_vars, check_states)):
-
-                if flag:
-                    B = variable.B
-                else:
-                    B = [{i} for i in range(np.max(C[:, i]) + 1)]
-
-                try:
-                    x1 = [B[int(k)] for k in C[is_cmp, i]]
-                except TypeError:
-                    x1 = [variable.B_fly(int(k)) for k in C[is_cmp, i]]
-                    check = [bool(variable.B_fly(state).intersection(x)) for x in x1]
-                else:
-                    check = [bool(B[state].intersection(x)) for x in x1]
-
-                is_cmp[np.where(is_cmp > 0)[0][:len(check)]] = check
-
-            #FIXME
-            """if self.Cs.size:
-                _, idx = ismember(M.variables, self.variables[:self.no_child])
-                check_vars = get_value_given_condn(M.variables, idx)
-                check_states = get_value_given_condn(M.C[0], idx)
-                idx = get_value_given_condn(idx, idx)
-
-                Cs = self.Cs[:, idx].copy()
-
-                is_cmp_Cs = np.ones(shape=C.shape[0], dtype=bool)
-
-                for i, (variable, state) in enumerate(zip(check_vars, check_states)):
-
-                    if flag:
-                        B = variable.B
-                    else:
-                        B = [{i} for i in range(np.max(Cs[:, i]) + 1)]
-
-                    x1 = [B[int(k)] for k in Cs[is_cmp_Cs, i]]
-                    check = [bool(B[state].intersection(x)) for x in x1]
-
-                    is_cmp_Cs[np.where(is_cmp_Cs > 0)[0][:len(check)]] = check
-
-                is_cmp = {'C': is_cmp_C, 'Cs': is_cmp_Cs}
-            else:
-                is_cmp = is_cmp_C"""
-
-        """if M.Cs.size: # Cs is not compared with other Cs but only with C.
-            _, idx = ismember(M.variables, self.variables)
-            check_vars = get_value_given_condn(M.variables, idx)
-            check_states = get_value_given_condn(M.C[0], idx)
-            idx = get_value_given_condn(idx, idx)
-
-            C = self.C[:, idx].copy()
-
-            is_cmp_C = np.ones(shape=C.shape[0], dtype=bool)
-
-            for i, (variable, state) in enumerate(zip(check_vars, check_states)):
-
-                if flag:
-                    B = variable.B
-                else:
-                    B = [{i} for i in range(np.max(C[:, i]) + 1)]
-
-                x1 = [B[int(k)] for k in C[is_cmp_C, i]]
-                check = [bool(B[state].intersection(x)) for x in x1]
-
-                is_cmp_C[np.where(is_cmp_C > 0)[0][:len(check)]] = check
-
-            is_cmp = is_cmp_C"""
+        else:
+            is_cmp = []
 
         return is_cmp
 
@@ -749,43 +692,33 @@ class Cpm(object):
         M = Cpm(variables=_variables,
                 C=self.C[:, vars_rem_idx],
                 no_child=len(vars_rem_idx),
-                p=self.p,
-                q=self.q,
-                sample_idx=self.sample_idx)
+                p = self.p)
 
-        Csum, psum, qsum, sample_idx_sum = [], [], [], []
+        Csum = np.array([], dtype=int).reshape(0, len(vars_rem))
+        psum = []
 
         while M.C.size:
 
-            Mc = M.get_subset([0]) # need to change to 0 
-            is_cmp = M.iscompatible(Mc, flag=False)
+            Mc = M.get_subset([0])
+            is_cmp = iscompatible(M.C, vars_rem, vars_rem, Mc.C, composite_state=False)
 
-            Csum.append(M.C[[0]])
+            Csum = np.vstack((Csum, Mc.C[0]))
 
             if M.p.size:
                 psum.append(np.sum(M.p[is_cmp]))
-
-            if M.q.size:
-                qsum.append(M.q[0])
-
-            if M.sample_idx.size:
-                sample_idx_sum.append(M.sample_idx[0])
 
             M = M.get_subset(np.where(is_cmp)[0], flag=0)
 
         Ms = Cpm(variables=vars_rem,
                  no_child=no_child_sum,
-                 C=np.reshape(Csum, (-1, M.C.shape[1])),
+                 C=Csum,
                  p=np.reshape(psum, (-1, 1)))
 
         if self.Cs.size:
-            lia, res = ismember(vars_rem, self.variables)
 
-            Cs = np.empty((len(self.Cs), len(vars_rem)), dtype=np.int32)
-            for i,r in enumerate(res):
-                Cs[:,i] = self.Cs[:,r]
+            Cs = self.Cs[:, vars_rem_idx].copy()
 
-            Ms.Cs = Cs.copy()
+            Ms.Cs = Cs.astype(int)
             Ms.q = self.q.copy()
             Ms.ps = self.ps.copy()
             Ms.sample_idx = self.sample_idx.copy()
@@ -892,30 +825,14 @@ class Cpm(object):
             Mx.p = Mx.p[is_cmp]
 
         if Mx.Cs.size: # NB: ps is not properly updated if the corresponding instance is not in C.
-            _, res = ismember(Mx.variables, cnd_vars)
 
-            if any(not isinstance(r,bool) for r in res[:Mx.no_child]): # conditioned variables belong to child nodes
-                ps = []
-                for c, q in zip(Mx.Cs, Mx.q):
-
-                    var_states = [cnd_states[r] if not isinstance(r,bool) else c[i] for i,r in enumerate(res)]
-                    pr = Mx.get_prob(Mx.variables, var_states)
-                    ps.append(pr*q[0])
-
-                Mx.ps = ps # the conditioned variables' samples are removed.
-
-            elif all(isinstance(r,bool) and r==False for r in res): # conditioned variables are not in the scope.
-                Mx.ps = Mx.q.copy()
-
-            else: # conditioned variables are in parent nodes.
-                ps = []
-
-                for c in Mx.Cs:
-                    var_states = [cnd_states[r] if not isinstance(r,bool) else c[i] for i,r in enumerate(res)]
-                    pr = Mx.get_prob(Mx.variables, var_states)
-                    ps.append(pr)
-
-                Mx.ps = ps
+            Cnew_with_minus1 = _get_Cnew(Mx.Cs, np.array([cnd_states]), Mx.variables, cnd_vars, Mx.variables)
+            
+            mask = np.sum( Cnew_with_minus1 < 0, axis=1 ) < 1
+            Cs_new, ps_new = Cnew_with_minus1[mask], Mx.ps[mask]
+            q_new, sample_idx_new = Mx.q[mask], Mx.sample_idx[mask]
+            
+            Mx.Cs, Mx.q, Mx.ps, Mx.sample_idx = Cs_new, q_new, ps_new, sample_idx_new
 
         return Mx
 
@@ -1117,13 +1034,18 @@ def C_prod_Cs(M1, M2, new_vars):
     Cnew_with_minus1 = _get_Cnew(M1.C, M2.Cs, M1.variables, M2.variables, new_vars)
 
     n_row1, n_row2 = len(M1.C), len(M2.Cs)
-    ps_new = np.repeat(M1.p, n_row2) * np.tile(M2.q, (n_row1, 1)).flatten()
+    ps_new = np.repeat(M1.p, n_row2) * np.tile(M2.ps, (n_row1, 1)).flatten()
     sample_idx_new = np.tile(M2.sample_idx, (n_row1, 1))
-    q_new = np.tile(M2.q, (n_row1, 1))
+    q_new = np.repeat(M1.p, n_row2) * np.tile(M2.q, (n_row1, 1)).flatten()
 
     mask = np.sum( Cnew_with_minus1 < 0, axis=1 ) < 1
     Cs_new, ps_new = Cnew_with_minus1[mask], ps_new[mask]
     q_new, sample_idx_new = q_new[mask], sample_idx_new[mask]
+
+    # Sort rows by sample_idx for readability
+    sorted_idx = np.argsort(sample_idx_new.flatten())
+    Cs_new, q_new = Cs_new[sorted_idx], q_new[sorted_idx]
+    ps_new, sample_idx_new = ps_new[sorted_idx], sample_idx_new[sorted_idx]
 
     return Cs_new, q_new, ps_new, sample_idx_new
 
@@ -1218,13 +1140,13 @@ def _get_Cnew(C1, C2, vars1, vars2, new_vars):
 
             C1_ = C1[:, new_vars_idx1[k]]
             for i, b in enumerate(C1_):
-                st = list( v.B[ b ] )
+                st = list( v.get_set(b) )
                 Bvec1[i, st] = 1
             Bvec1 = np.tile(Bvec1, (n_row2, 1, 1))
 
             C2_ = C2[:, new_vars_idx2[k]]
             for i, b in enumerate(C2_):
-                st = list( v.B[ b ] )
+                st = list( v.get_set(b) )
                 Bvec2[i, st] = 1
             Bvec2 = np.tile(Bvec2[:, np.newaxis, :], (1, n_row1, 1))
 
@@ -1329,7 +1251,7 @@ def get_value_given_condn(A, condn):
     return val
 
 
-def iscompatible(C, variables, check_vars, check_states):
+def iscompatible(C, variables, check_vars, check_states, composite_state=False):
     """
     Returns a boolean list
 
@@ -1339,44 +1261,36 @@ def iscompatible(C, variables, check_vars, check_states):
     variables: array_like
     check_vars: array_like list of Variable or string
     check_sates: array_like list of index or string
-    var: dict of instance of Variable
+    composite_state: False if the same rows are returned;
+        True if composite states and basic state can be
+        considered compatible if they are. 
     """
     if check_vars and isinstance(check_vars[0], str):
         check_vars = [x for y in check_vars for x in variables if x.name == y]
 
     _, idx = ismember(check_vars, variables)
     check_vars = get_value_given_condn(check_vars, idx)
-    check_states = get_value_given_condn(check_states, idx)
-    idx = get_value_given_condn(idx, idx)
 
-    C = C[:, idx].copy()
+    if len(check_vars) > 0:
+        check_states = get_value_given_condn(check_states, idx)
+        idx = get_value_given_condn(idx, idx)
 
-    is_cmp = np.ones(shape=C.shape[0], dtype=bool)
+        C = C[:, idx].copy()
 
-    for i, (variable, state) in enumerate(zip(check_vars, check_states)):
+        for i, (variable, state) in enumerate(zip(check_vars, check_states)):
 
-        if isinstance(state, str):
-            state = variable.values.index(state)
+            if isinstance(state, str):
+                state = variable.values.index(state)
+                check_states[i] = state
 
-        try:
-            B = variable.B
-        except NameError:
-            print(f'{variable} is not defined')
+        if not composite_state:
+            is_cmp = np.all(C == check_states, axis=1).tolist()
 
-        try:
-            x1 = [B[int(k)] for k in C[is_cmp, i]]
-        except TypeError:
-            x1 = [variable.B_fly(int(k)) for k in C[is_cmp, i]]
-
-        try:
-            check = [bool(B[state].intersection(x)) for x in x1]
-        except IndexError:
-            print('IndexError: {state}')
-        except TypeError:
-            check = [bool(variable.B_fly(state).intersection(x)) for x in x1]
-            is_cmp[np.where(is_cmp > 0)[0][:len(check)]] = check
         else:
-            is_cmp[np.where(is_cmp > 0)[0][:len(check)]] = check
+            Cnew_with_minus1 = _get_Cnew(C, np.array([check_states]), check_vars, check_vars, check_vars)
+            is_cmp = np.all(Cnew_with_minus1 >= 0, axis=1).tolist()
+    else:
+        is_cmp = np.ones(shape=C.shape[0], dtype=bool).tolist()
 
     return is_cmp
 

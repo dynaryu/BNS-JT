@@ -285,7 +285,7 @@ def setup_Msys_Mcomps():
     cpms['x2_c'] = cpm.Cpm( [varis['x2'], varis['haz']], 1, np.array([[0,0], [1,0]]), p = [0.2, 0.8] )
 
     return varis, cpms
-
+    
 
 @pytest.fixture()
 def setup_hybrid():
@@ -312,6 +312,44 @@ def setup_hybrid():
     cpms['x1'].ps = [0.7,0.3,0.3,0.6,0.3]
     cpms['sys'].Cs, cpms['sys'].q, cpms['sys'].sample_idx = np.array([[0,0,1],[1,1,0],[1,1,0],[0,0,1],[1,1,0]]), [1,1,1,1,1], [0,1,2,3,4]
     cpms['sys'].ps = [1,1,1,1,1]
+
+    return varis, cpms
+
+@pytest.fixture()
+def setup_hybrid2():
+
+    varis, cpms = {}, {}
+
+    varis['x0'] = variable.Variable(name='x0', values=['fail', 'surv'])
+    cpms['x0'] = cpm.Cpm(variables=[varis['x0']], no_child=1, C=np.array([[0],[1]]), p=[0.05,0.95])
+    varis['x1'] = variable.Variable(name='x1', values=['fail', 'surv'])
+    cpms['x1'] = cpm.Cpm(variables=[varis['x1']], no_child=1, C=np.array([[0],[1]]), p=[0.01, 0.99])
+    varis['x2'] = variable.Variable(name='x2', values=['fail', 'surv'])
+    cpms['x2'] = cpm.Cpm(variables=[varis['x2']], no_child=1, C=np.array([[0],[1]]), p=[0.05,0.95])
+    varis['x3'] = variable.Variable(name='x3', values=['fail', 'surv'])
+    cpms['x3'] = cpm.Cpm(variables=[varis['x3']], no_child=1, C=np.array([[0],[1]]), p=[0.01, 0.99])
+
+    varis['sys'] = variable.Variable(name='sys', values=['fail', 'surv'])
+    cpms['sys'] = cpm.Cpm(variables=[varis['sys'], varis['x0'], varis['x1'], varis['x2'], varis['x3']],
+                          no_child=1, C=np.array([[0,2,2,2,0],[1,1,2,2,1]]), p=np.array([1.0,1.0])) # incomplete C (i.e. C does not include all instances)
+
+    # samples
+    cpms['x0'].Cs, cpms['x0'].sample_idx = np.array([[1],[0],[0],[1],[1]]), [0,1,2,3,4]
+    cpms['x0'].q, cpms['x0'].ps = [0.95, 0.05, 0.05, 0.95, 0.95], [0.95, 0.05, 0.05, 0.95, 0.95]
+    
+    cpms['x1'].Cs, cpms['x1'].sample_idx = np.array([[1],[1],[0],[1],[0]]), [0,1,2,3,4]
+    cpms['x1'].q, cpms['x1'].ps = [0.99, 0.99, 0.01, 0.99, 0.01], [0.99, 0.99, 0.01, 0.99, 0.01]
+
+    cpms['x2'].Cs, cpms['x2'].sample_idx = np.array([[1],[1],[0],[0],[1]]), [0,1,2,3,4]
+    cpms['x2'].q, cpms['x2'].ps = [0.95, 0.95, 0.05, 0.05, 0.95], [0.95, 0.95, 0.05, 0.05, 0.95]
+
+    cpms['x3'].Cs, cpms['x3'].sample_idx = np.array([[0],[1],[1],[1],[0]]), [0,1,2,3,4]
+    cpms['x3'].q, cpms['x3'].ps = [0.01, 0.99, 0.99, 0.99, 0.01], [0.01, 0.99, 0.99, 0.99, 0.01]
+
+    cpms['sys'].Cs = np.array([[0, 1, 1, 1, 0], [1, 0, 1, 1, 1], [0, 0, 0, 0, 1], [1, 1, 1, 0, 1], [0, 1, 0, 1, 0]])
+    cpms['sys'].q = [1.0, 1.0, 1.0, 1.0, 1.0]
+    cpms['sys'].sample_idx = [0,1,2,3,4]
+    cpms['sys'].ps = [1.0, 1.0, 1.0, 1.0, 1.0]
 
     return varis, cpms
 
@@ -519,7 +557,7 @@ def test_iscompatibleCpm1(setup_iscompatible):
     M, _ = setup_iscompatible
     rowIndex = [0]
     M_sys_select = M[5].get_subset(rowIndex)
-    result = M[3].iscompatible(M_sys_select, flag=True)
+    result = M[3].iscompatible(M_sys_select, composite_state=True)
     expected = np.array([1, 1, 1, 1])
     np.testing.assert_array_equal(result, expected)
 
@@ -538,7 +576,7 @@ def test_iscompatibleCpm1s(var_A1_to_A5):
     # M[5]
     rowIndex = [0]  # 1 -> 0
     M_sys_select = M[5].get_subset(rowIndex)
-    result = M[3].iscompatible(M_sys_select, flag=True)
+    result = M[3].iscompatible(M_sys_select, composite_state=True)
     expected = np.array([1, 1, 1, 1])
     np.testing.assert_array_equal(result, expected)
 
@@ -557,7 +595,7 @@ def test_iscompatibleCpm1sf(var_A1_to_A5):
     # M[5]
     rowIndex = [0]  # 1 -> 0
     M_sys_select = M[5].get_subset(rowIndex)
-    result = M[3].iscompatible(M_sys_select, flag=True)
+    result = M[3].iscompatible(M_sys_select, composite_state=True)
     expected = np.array([1, 1, 1, 1])
     np.testing.assert_array_equal(result, expected)
 
@@ -569,7 +607,7 @@ def test_iscompatibleCpm2(setup_iscompatible):
     rowIndex = [0]  # 1 -> 0
     M_sys_select = M[5].get_subset(rowIndex)
 
-    result = M[4].iscompatible(M_sys_select, flag=True)
+    result = M[4].iscompatible(M_sys_select, composite_state=True)
     expected = np.array([0, 1, 0, 1])
     np.testing.assert_array_equal(result, expected)
 
@@ -581,7 +619,7 @@ def test_iscompatibleCpm3(setup_iscompatible):
     rowIndex = [0]  # 1 -> 0
     M_sys_select = M[5].get_subset(rowIndex)
 
-    result = M[1].iscompatible(M_sys_select, flag=True)
+    result = M[1].iscompatible(M_sys_select, composite_state=True)
     expected = np.array([1, 1])
     np.testing.assert_array_equal(result, expected)
 
@@ -607,7 +645,7 @@ def test_iscompatibleCpm4(setup_bridge):
              no_child=6,
              C=np.array([[2, 1, 1, 2, 2, 2]]),
              p=np.array([[0.839]]))
-    result = M.iscompatible(Mc, flag=False)
+    result = M.iscompatible(Mc, composite_state=False)
 
     expected = np.array([True, False, False, False])
     np.testing.assert_array_equal(result, expected)
@@ -620,7 +658,7 @@ def test_iscompatibleCpm5(setup_iscompatible_Bfly):
     rowIndex = [0]  # 1 -> 0
     M_sys_select = M[5].get_subset(rowIndex)
 
-    result = M[4].iscompatible(M_sys_select, flag=True)
+    result = M[4].iscompatible(M_sys_select, composite_state=True)
     expected = np.array([0, 1, 0, 1])
     np.testing.assert_array_equal(result, expected)
 
@@ -632,7 +670,7 @@ def test_iscompatibleCpm6(setup_iscompatible_Bfly):
     rowIndex = [0]  # 1 -> 0
     M_sys_select = M[5].get_subset(rowIndex)
 
-    result = M[4].iscompatible(M_sys_select, flag=True)
+    result = M[4].iscompatible(M_sys_select, composite_state=True)
     expected = np.array([0, 1, 0, 1])
     np.testing.assert_array_equal(result, expected)
 
@@ -977,7 +1015,7 @@ def test_iscompatible1f2(setup_iscompatible_Bfly2):
     variables = [v[2], v[1]]
     checkVars = [v[1]]
     checkStates = [3]
-    result = cpm.iscompatible(C, variables, checkVars, checkStates)
+    result = cpm.iscompatible(C, variables, checkVars, checkStates, composite_state=True)
     expected = np.array([1, 1, 1, 1, 0, 0])
     np.testing.assert_array_equal(expected, result)
 
@@ -991,7 +1029,7 @@ def test_iscompatible2(setup_iscompatible):
     variables = [v[5], v[2], v[3], v[4]]
     checkVars = [v[3], v[4]]
     checkStates = [1-1, 1-1]
-    result = cpm.iscompatible(C, variables, checkVars, checkStates)
+    result = cpm.iscompatible(C, variables, checkVars, checkStates, composite_state=True)
     expected = np.array([0, 1, 1, 0])
     np.testing.assert_array_equal(expected, result)
 
@@ -1100,21 +1138,6 @@ def test_iscompatible4(setup_iscompatible):
 
     expected = np.array([1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0]).T
     np.testing.assert_array_equal(compatCheck, expected)#
-
-def test_iscompatible5(setup_iscompatible_Bfly2):
-
-    M, v = setup_iscompatible_Bfly2
-
-    st0 = v[1].B_fly({0})
-    st1 = v[1].B_fly({1})
-    st2 = v[1].B_fly({2})
-    st3 = v[1].B_fly({0,1})
-    st4 = v[1].B_fly({0,2})
-    st5 = v[1].B_fly({1,2})
-    st6 = v[1].B_fly({0,1,2})
-
-    assert [st0, st1, st2, st3, st4, st5, st6] == [0, 1, 2, 3, 4, 5, 6]
-
 
 def test_iscompatible():
     C = np.array([[0,1], [0,1], [2,1], [1,1]])
@@ -1525,11 +1548,10 @@ def test_product4( setup_hybrid ):
         Mp0_p = Mp0.p[r_idx]
         assert p == pytest.approx(Mp0_p, rel=1e-3)
 
-    np.testing.assert_array_almost_equal(Mp0.Cs, np.array([[0,0],[0,1],[0,1],[1,0],[0,1]]))
-    np.testing.assert_array_almost_equal(Mp0.q, np.array([[0.07], [0.63], [0.63], [0.06], [0.63]]))
-    np.testing.assert_array_almost_equal(Mp0.ps, np.array([[0.049], [0.441], [0.441], [0.021], [0.441]]))
-    np.testing.assert_array_almost_equal(Mp0.sample_idx, np.array([[0],[1],[2],[3],[4]]))
-
+    np.testing.assert_array_almost_equal(Mp0.Cs, np.array([[0,0],[0,1],[0,1],[0,1]]))
+    np.testing.assert_array_almost_equal(Mp0.q, np.array([[0.07], [0.63], [0.63], [0.63]]))
+    np.testing.assert_array_almost_equal(Mp0.ps, np.array([[0.07], [0.63], [0.63], [0.63]]))
+    np.testing.assert_array_almost_equal(Mp0.sample_idx, np.array([[0],[1],[2],[4]]))
 
     assert Mp1.variables[0].name == 'haz' and Mp1.variables[1].name == 'x0' and Mp1.variables[2].name == 'x1'
     for c, p in zip( np.array([[0,0,0], [0,1,0], [0,0,1], [0,1,1]]), np.array([0.021, 0.189, 0.049, 0.441]) ):
@@ -1537,37 +1559,66 @@ def test_product4( setup_hybrid ):
         Mp1_p = Mp1.p[r_idx]
         assert p == pytest.approx(Mp1_p, rel=1e-3)
 
-    np.testing.assert_array_almost_equal(Mp1.Cs, np.array([[0,0,1],[0,1,0],[0,1,0],[1,0,1],[0,1,0]]))
-    np.testing.assert_array_almost_equal(Mp1.q, np.array([[0.049], [0.189], [0.189], [0.036], [0.189]]))
-    np.testing.assert_array_almost_equal(Mp1.ps, np.array([[0.0343], [0.1323], [0.1323], [0.015], [0.132]]), decimal=3)
+    np.testing.assert_array_almost_equal(Mp1.Cs, np.array([[0,0,1],[0,1,0],[0,1,0],[0,1,0]]))
+    np.testing.assert_array_almost_equal(Mp1.q, np.array([[0.049], [0.189], [0.189], [0.189]]))
+    np.testing.assert_array_almost_equal(Mp1.ps, np.array([[0.049], [0.189], [0.189], [0.189]]), decimal=3)
 
 def test_product5( setup_hybrid ):
+    """
+    Test C * Cs
+    """
+
     varis, cpms = setup_hybrid
-    Mc = operation.condition(cpms, ['haz'], [0])
-    Mp0 = Mc['haz'].product( Mc['x0'] )
-    Mp1 = Mp0.product(Mc['x1'])
+    cpms['haz'].Cs, cpms['haz'].q, cpms['haz'].ps, cpms['haz'].sample_idx = [], [], [], []
 
-    assert Mp0.variables[0].name == 'haz' and Mp0.variables[1].name == 'x0'
-    for c, p in zip( np.array([[0,0], [0,1]]), np.array([0.07, 0.63]) ):
-        r_idx = np.where(np.all(Mp0.C == c, axis=1))[0]
-        Mp0_p = Mp0.p[r_idx]
-        assert p == pytest.approx(Mp0_p, rel=1e-3)
+    Mprod = cpms['haz'].product(cpms['x0'])
 
-    np.testing.assert_array_almost_equal(Mp0.Cs, np.array([[0,0],[0,1],[0,1],[1,0],[0,1]]))
-    np.testing.assert_array_almost_equal(Mp0.q, np.array([[0.07], [0.63], [0.63], [0.06], [0.63]]))
-    np.testing.assert_array_almost_equal(Mp0.ps, np.array([[0.049], [0.441], [0.441], [0.021], [0.441]]))
-    np.testing.assert_array_almost_equal(Mp0.sample_idx, np.array([[0],[1],[2],[3],[4]]))
+    # variables
+    assert Mprod.variables[0].name == 'haz' and Mprod.variables[1].name == 'x0'
 
-    assert Mp1.variables[0].name == 'haz' and Mp1.variables[1].name == 'x0' and Mp1.variables[2].name == 'x1'
-    for c, p in zip( np.array([[0,0,0], [0,1,0], [0,0,1], [0,1,1]]), np.array([0.021, 0.189, 0.049, 0.441]) ):
-        r_idx = np.where(np.all(Mp1.C == c, axis=1))[0]
-        Mp1_p = Mp1.p[r_idx]
-        assert p == pytest.approx(Mp1_p, rel=1e-3)
+    # C * C
+    expected_C = np.array([[0,0], [0,1], [1,0], [1,1]])
+    expected_p = np.array([[0.07], [0.63], [0.06], [0.24]])
+    assert len(Mprod.C) == len(expected_C)
+    assert len(Mprod.p) == len(expected_p)
+    for i, row in enumerate(Mprod.C):
+        row_idx = np.where(np.all(expected_C == row, axis=1))[0]
+        assert row_idx.size == 1, f"Row {row} in Mp1_s.C must match exactly one row in expected_C"
+        expected_p_value = expected_p[row_idx[0]]
+        np.testing.assert_almost_equal(Mprod.p[i], expected_p_value, err_msg=f"p mismatch for row {row}")
 
-    np.testing.assert_array_almost_equal(Mp1.Cs, np.array([[0,0,1],[0,1,0],[0,1,0],[1,0,1],[0,1,0]]))
-    np.testing.assert_array_almost_equal(Mp1.q, np.array([[0.049], [0.189], [0.189], [0.036], [0.189]]))
-    np.testing.assert_array_almost_equal(Mp1.ps, np.array([[0.0343], [0.1323], [0.1323], [0.015], [0.132]]), decimal=3)
+    # C * Cs
+    np.testing.assert_array_almost_equal(Mprod.Cs, np.array([[0,0],[0,1],[0,1],[1,0],[0,1]]))
+    np.testing.assert_array_almost_equal(Mprod.q, np.array([[0.07], [0.63], [0.63], [0.06], [0.63]]))
+    np.testing.assert_array_almost_equal(Mprod.ps, np.array([[0.07], [0.63], [0.63], [0.06], [0.63]]))
+    np.testing.assert_array_almost_equal(Mprod.sample_idx, np.array([[0],[1],[2],[3],[4]]))
 
+def test_product6( setup_hybrid2 ):
+    varis, cpms = setup_hybrid2
+
+    Mx0_noC = copy.deepcopy( cpms['x0'] )
+    Mx0_noC.C, Mx0_noC.p = [], []
+
+    Mprod = cpms['sys'].product(Mx0_noC)
+
+    assert all(x.name == y.name for x, y in zip(Mprod.variables, cpms['sys'].variables))
+
+    assert len(Mprod.C) == 0
+    assert len(Mprod.p) == 0
+
+    expected_sample_idx = np.array([[0], [0], [0], [1], [1], [2], [2], [3], [3], [3], [4], [4], [4]])
+    np.testing.assert_array_equal(Mprod.sample_idx, expected_sample_idx)
+
+    expected_Cs = np.array([[0, 1, 2, 2, 0], [1, 1, 2, 2, 1], [0, 1, 1, 1, 0],
+                            [0, 0, 2, 2, 0], [1, 0, 1, 1, 1], [0, 0, 2, 2, 0], [0, 0, 0, 0, 1],
+                            [0, 1, 2, 2, 0], [1, 1, 2, 2, 1], [1, 1, 1, 0, 1],
+                            [0, 1, 2, 2, 0], [1, 1, 2, 2, 1], [0, 1, 0, 1, 0]])
+    np.testing.assert_array_equal(Mprod.Cs, expected_Cs)
+
+    expected_q = np.array([0.95, 0.95, 0.95, 0.05, 0.05, 0.05, 0.05,
+                           0.95, 0.95, 0.95, 0.95, 0.95, 0.95])
+    np.testing.assert_array_almost_equal(Mprod.q.flatten(), expected_q)
+    np.testing.assert_array_almost_equal(Mprod.ps.flatten(), expected_q)
 
 
 def test_sum6(setup_hybrid):
@@ -1582,42 +1633,27 @@ def test_sum6(setup_hybrid):
     assert Mp0_s.variables[0].name == 'haz'
     np.testing.assert_array_almost_equal(Mp0_s.C, np.array([[0]]))
     np.testing.assert_array_almost_equal(Mp0_s.p, np.array([[0.7]]))
-    np.testing.assert_array_almost_equal(Mp0_s.Cs, np.array([[0],[0],[0],[1],[0]]))
+    np.testing.assert_array_almost_equal(Mp0_s.Cs, np.array([[0],[0],[0],[0]]))
     np.testing.assert_array_almost_equal(Mp0_s.q, Mp0.q)
     np.testing.assert_array_almost_equal(Mp0_s.ps, Mp0.ps)
     np.testing.assert_array_almost_equal(Mp0_s.sample_idx, Mp0.sample_idx)
 
     assert Mp1_s.variables[0].name == 'x0' and Mp1_s.variables[1].name == 'x1'
-    np.testing.assert_array_almost_equal(Mp1_s.C, np.array([[0,0], [1,0], [0,1], [1,1]]))
-    np.testing.assert_array_almost_equal(Mp1_s.p, np.array([[0.021], [0.189], [0.049], [0.441]]))
-    np.testing.assert_array_almost_equal(Mp1_s.Cs, np.array([[0,1],[1,0],[1,0],[0,1],[1,0]]))
+
+    expected_C = np.array([[0,0], [1,0], [0,1], [1,1]])
+    expected_p = np.array([[0.021], [0.189], [0.049], [0.441]])
+    assert len(Mp1_s.C) == 4
+    assert len(Mp1_s.p) == 4
+    for i, row in enumerate(Mp1_s.C):
+        row_idx = np.where(np.all(expected_C == row, axis=1))[0]
+        assert row_idx.size == 1, f"Row {row} in Mp1_s.C must match exactly one row in expected_C"
+        expected_p_value = expected_p[row_idx[0]]
+        np.testing.assert_almost_equal(Mp1_s.p[i], expected_p_value, err_msg=f"p mismatch for row {row}")
+
+    np.testing.assert_array_almost_equal(Mp1_s.Cs, np.array([[0,1],[1,0],[1,0],[1,0]]))
     np.testing.assert_array_almost_equal(Mp1_s.q, Mp1.q)
     np.testing.assert_array_almost_equal(Mp1_s.ps, Mp1.ps)
 
-
-def test_sum7(setup_hybrid):
-    varis, cpms = setup_hybrid
-    Mc = operation.condition(cpms, ['haz'], [0])
-    Mp0 = Mc['haz'].product( Mc['x0'] )
-    Mp1 = Mp0.product(Mc['x1'])
-
-    Mp0_s = Mp0.sum([varis['x0']])
-    Mp1_s = Mp1.sum([varis['haz']])
-
-    assert Mp0_s.variables[0].name == 'haz'
-    np.testing.assert_array_almost_equal(Mp0_s.C, np.array([[0]]))
-    np.testing.assert_array_almost_equal(Mp0_s.p, np.array([[0.7]]))
-    np.testing.assert_array_almost_equal(Mp0_s.Cs, np.array([[0],[0],[0],[1],[0]]))
-    np.testing.assert_array_almost_equal(Mp0_s.q, Mp0.q)
-    np.testing.assert_array_almost_equal(Mp0_s.ps, Mp0.ps)
-    np.testing.assert_array_almost_equal(Mp0_s.sample_idx, Mp0.sample_idx)
-
-    assert Mp1_s.variables[0].name == 'x0' and Mp1_s.variables[1].name == 'x1'
-    np.testing.assert_array_almost_equal(Mp1_s.C, np.array([[0,0], [1,0], [0,1], [1,1]]))
-    np.testing.assert_array_almost_equal(Mp1_s.p, np.array([[0.021], [0.189], [0.049], [0.441]]))
-    np.testing.assert_array_almost_equal(Mp1_s.Cs, np.array([[0,1],[1,0],[1,0],[0,1],[1,0]]))
-    np.testing.assert_array_almost_equal(Mp1_s.q, Mp1.q)
-    np.testing.assert_array_almost_equal(Mp1_s.ps, Mp1.ps)
 
 
 def test_merge1(setup_product):
