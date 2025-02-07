@@ -416,8 +416,11 @@ def isinscope(idx, cpms):
     isin = np.zeros((len(cpms), 1), dtype=bool)
 
     for i in idx:
-
-        flag = np.array([cpm.ismember([i], M.variables)[0] for M in cpms])
+        
+        if isinstance(i, str):
+            flag = np.array([cpm.ismember([i], [x.name for x in M.variables])[0] for M in cpms])
+        else:
+            flag = np.array([cpm.ismember([i], M.variables)[0] for M in cpms])
         isin = isin | flag
 
     return isin
