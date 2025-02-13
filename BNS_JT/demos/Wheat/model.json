@@ -34,9 +34,30 @@
         }
     },
     "sysout_setup": {
-        "od1": {
+        "Wooroloo-Merredin": {
             "origin": "Wooroloo",
             "destination": "Merredin",
+            "output_node_capacity": null,
+            "capacity_fraction": null,
+            "priorty": null
+        },
+        "Northam-York": {
+            "origin": "Northam",
+            "destination": "York",
+            "output_node_capacity": null,
+            "capacity_fraction": null,
+            "priorty": null
+        },
+        "York-Cunderdin": {
+            "origin": "York",
+            "destination": "Cunderdin",
+            "output_node_capacity": null,
+            "capacity_fraction": null,
+            "priorty": null
+        },
+        "York-Kellerberrin": {
+            "origin": "York",
+            "destination": "Kellerberrin",
             "output_node_capacity": null,
             "capacity_fraction": null,
             "priorty": null
@@ -44,617 +65,829 @@
     },
     "node_conn_df": {
         "1": {
-            "origin": "Wooroloo",
-            "destination": "4527",
-            "link_capacity": null,
-            "weight": 203
-        },
-        "2": {
-            "origin": "4527",
-            "destination": "0369",
-            "link_capacity": null,
-            "weight": 1061
-        },
-        "3": {
-            "origin": "0369",
-            "destination": "0692",
-            "link_capacity": null,
-            "weight": 306
-        },
-        "4": {
-            "origin": "0692",
-            "destination": "0693",
-            "link_capacity": null,
-            "weight": 77
-        },
-        "5": {
-            "origin": "0693",
-            "destination": "0694",
-            "link_capacity": null,
-            "weight": 11
-        },
-        "6": {
-            "origin": "0694",
-            "destination": "0631A",
-            "link_capacity": null,
-            "weight": 137
-        },
-        "7": {
-            "origin": "0631A",
-            "destination": "0632A",
-            "link_capacity": null,
-            "weight": 77
-        },
-        "8": {
-            "origin": "0632A",
-            "destination": "0633A",
-            "link_capacity": null,
-            "weight": 112
-        },
-        "9": {
-            "origin": "0633A",
-            "destination": "0634",
-            "link_capacity": null,
-            "weight": 485
-        },
-        "10": {
-            "origin": "0634",
-            "destination": "0637",
-            "link_capacity": null,
-            "weight": 762
-        },
-        "11": {
-            "origin": "0637",
-            "destination": "0765",
-            "link_capacity": null,
-            "weight": 421
-        },
-        "12": {
-            "origin": "0765",
-            "destination": "0639",
-            "link_capacity": null,
-            "weight": 869
-        },
-        "13": {
-            "origin": "0639",
-            "destination": "Merredin",
-            "link_capacity": null,
-            "weight": 5797
-        },
-        "14": {
-            "origin": "Wooroloo",
-            "destination": "0606",
-            "link_capacity": null,
-            "weight": 531
-        },
-        "15": {
-            "origin": "0606",
-            "destination": "9306",
-            "link_capacity": null,
-            "weight": 551
-        },
-        "16": {
-            "origin": "9306",
-            "destination": "1046",
-            "link_capacity": null,
-            "weight": 20
-        },
-        "17": {
-            "origin": "1046",
-            "destination": "1047",
-            "link_capacity": null,
-            "weight": 193
-        },
-        "18": {
-            "origin": "1047",
-            "destination": "9186",
-            "link_capacity": null,
-            "weight": 297
-        },
-        "19": {
-            "origin": "9186",
-            "destination": "1469",
-            "link_capacity": null,
-            "weight": 46
-        },
-        "20": {
-            "origin": "1469",
-            "destination": "1468",
-            "link_capacity": null,
-            "weight": 23
-        },
-        "21": {
-            "origin": "1468",
-            "destination": "1504",
-            "link_capacity": null,
-            "weight": 9
-        },
-        "22": {
-            "origin": "1504",
-            "destination": "1467",
-            "link_capacity": null,
-            "weight": 5
-        },
-        "23": {
-            "origin": "1467",
-            "destination": "1466",
-            "link_capacity": null,
-            "weight": 60
-        },
-        "24": {
-            "origin": "1466",
-            "destination": "1465",
-            "link_capacity": null,
-            "weight": 78
-        },
-        "25": {
-            "origin": "1465",
-            "destination": "1464",
-            "link_capacity": null,
-            "weight": 5
-        },
-        "26": {
-            "origin": "1464",
-            "destination": "1463",
-            "link_capacity": null,
-            "weight": 18
-        },
-        "27": {
-            "origin": "1463",
-            "destination": "9187",
-            "link_capacity": null,
-            "weight": 49
-        },
-        "28": {
-            "origin": "9187",
-            "destination": "1149",
-            "link_capacity": null,
-            "weight": 223
-        },
-        "29": {
-            "origin": "1149",
-            "destination": "1150",
-            "link_capacity": null,
-            "weight": 130
-        },
-        "30": {
-            "origin": "1150",
-            "destination": "1153",
-            "link_capacity": null,
-            "weight": 79
-        },
-        "31": {
-            "origin": "1153",
-            "destination": "1154",
-            "link_capacity": null,
-            "weight": 175
-        },
-        "32": {
-            "origin": "1154",
-            "destination": "0617",
-            "link_capacity": null,
-            "weight": 439
-        },
-        "33": {
-            "origin": "0617",
-            "destination": "1006",
-            "link_capacity": null,
-            "weight": 4053
-        },
-        "34": {
-            "origin": "1006",
-            "destination": "1007",
-            "link_capacity": null,
-            "weight": 7
-        },
-        "35": {
-            "origin": "1007",
-            "destination": "1050",
-            "link_capacity": null,
-            "weight": 283
-        },
-        "36": {
-            "origin": "1050",
-            "destination": "0627",
-            "link_capacity": null,
-            "weight": 337
-        },
-        "37": {
-            "origin": "0627",
-            "destination": "Merredin",
-            "link_capacity": null,
-            "weight": 263
-        },
-        "38": {
-            "origin": "Wooroloo",
-            "destination": "0574",
-            "link_capacity": null,
-            "weight": 1158
-        },
-        "39": {
-            "origin": "0574",
-            "destination": "0576",
-            "link_capacity": null,
-            "weight": 625
-        },
-        "40": {
-            "origin": "0576",
-            "destination": "0290",
-            "link_capacity": null,
-            "weight": 478
-        },
-        "41": {
-            "origin": "0290",
-            "destination": "0579",
-            "link_capacity": null,
-            "weight": 88
-        },
-        "42": {
-            "origin": "0579",
-            "destination": "0580",
-            "link_capacity": null,
-            "weight": 50
-        },
-        "43": {
-            "origin": "0580",
-            "destination": "0897",
-            "link_capacity": null,
-            "weight": 585
-        },
-        "44": {
-            "origin": "0897",
-            "destination": "0898",
-            "link_capacity": null,
-            "weight": 115
-        },
-        "45": {
-            "origin": "0898",
-            "destination": "0589",
-            "link_capacity": null,
-            "weight": 203
-        },
-        "46": {
-            "origin": "0589",
-            "destination": "0592",
-            "link_capacity": null,
-            "weight": 295
-        },
-        "47": {
-            "origin": "0592",
-            "destination": "0596",
-            "link_capacity": null,
-            "weight": 1591
-        },
-        "48": {
-            "origin": "0596",
-            "destination": "0597",
-            "link_capacity": null,
-            "weight": 367
-        },
-        "49": {
-            "origin": "0597",
-            "destination": "0598",
-            "link_capacity": null,
-            "weight": 44
-        },
-        "50": {
-            "origin": "0598",
-            "destination": "0602",
-            "link_capacity": null,
-            "weight": 1021
-        },
-        "51": {
-            "origin": "0602",
-            "destination": "Merredin",
-            "link_capacity": null,
-            "weight": 2858
-        },
-        "52": {
-            "origin": "0576",
-            "destination": "0291",
-            "link_capacity": null,
-            "weight": 485
-        },
-        "53": {
-            "origin": "0291",
-            "destination": "0299",
-            "link_capacity": null,
-            "weight": 341
-        },
-        "54": {
-            "origin": "0299",
-            "destination": "0300",
-            "link_capacity": null,
-            "weight": 70
-        },
-        "55": {
-            "origin": "0300",
-            "destination": "0301",
-            "link_capacity": null,
-            "weight": 153
-        },
-        "56": {
-            "origin": "0301",
-            "destination": "0302",
-            "link_capacity": null,
-            "weight": 102
-        },
-        "57": {
-            "origin": "0302",
-            "destination": "0303",
-            "link_capacity": null,
-            "weight": 68
-        },
-        "58": {
-            "origin": "0303",
-            "destination": "0304",
-            "link_capacity": null,
-            "weight": 7
-        },
-        "59": {
-            "origin": "0304",
-            "destination": "0305",
-            "link_capacity": null,
-            "weight": 110
-        },
-        "60": {
-            "origin": "0305",
-            "destination": "5093",
-            "link_capacity": null,
-            "weight": 5996
-        },
-        "61": {
-            "origin": "5093",
-            "destination": "5281",
-            "link_capacity": null,
-            "weight": 271
-        },
-        "62": {
-            "origin": "5281",
-            "destination": "5099A",
-            "link_capacity": null,
-            "weight": 169
-        },
-        "63": {
-            "origin": "5099A",
-            "destination": "6223A",
-            "link_capacity": null,
-            "weight": 341
-        },
-        "64": {
-            "origin": "6223A",
-            "destination": "5100A",
-            "link_capacity": null,
-            "weight": 3
-        },
-        "65": {
-            "origin": "5100A",
-            "destination": "Merredin",
-            "link_capacity": null,
-            "weight": 2414
-        },
-        "66": {
-            "origin": "Wooroloo",
-            "destination": "0361",
-            "link_capacity": null,
-            "weight": 480
-        },
-        "67": {
-            "origin": "0361",
-            "destination": "Merredin",
-            "link_capacity": null,
-            "weight": 413
-        },
-        "68": {
-            "origin": "Wooroloo",
-            "destination": "0752",
-            "link_capacity": null,
-            "weight": 647
-        },
-        "69": {
-            "origin": "0752",
-            "destination": "0753",
-            "link_capacity": null,
-            "weight": 251
-        },
-        "70": {
-            "origin": "0753",
-            "destination": "0754",
-            "link_capacity": null,
-            "weight": 8
-        },
-        "71": {
-            "origin": "0754",
-            "destination": "0761",
-            "link_capacity": null,
-            "weight": 547
-        },
-        "72": {
-            "origin": "0761",
-            "destination": "0762",
-            "link_capacity": null,
-            "weight": 126
-        },
-        "73": {
-            "origin": "0762",
-            "destination": "0763A",
-            "link_capacity": null,
-            "weight": 160
-        },
-        "74": {
-            "origin": "0763A",
-            "destination": "0765",
-            "link_capacity": null,
-            "weight": 643
-        },
-        "75": {
-            "origin": "0765",
-            "destination": "Merredin",
-            "link_capacity": null,
-            "weight": 869
-        },
-        "76": {
-            "origin": "Wooroloo",
-            "destination": "0289",
-            "link_capacity": null,
-            "weight": 244
-        },
-        "77": {
-            "origin": "0289",
-            "destination": "0288",
-            "link_capacity": null,
-            "weight": 29
-        },
-        "78": {
-            "origin": "0288",
-            "destination": "0287",
-            "link_capacity": null,
-            "weight": 28
-        },
-        "79": {
-            "origin": "0287",
-            "destination": "0286",
-            "link_capacity": null,
-            "weight": 117
-        },
-        "80": {
-            "origin": "0286",
-            "destination": "0285",
-            "link_capacity": null,
-            "weight": 20
-        },
-        "81": {
-            "origin": "0285",
-            "destination": "0284",
-            "link_capacity": null,
-            "weight": 73
-        },
-        "82": {
-            "origin": "0284",
-            "destination": "0283",
-            "link_capacity": null,
-            "weight": 21
-        },
-        "83": {
-            "origin": "0283",
-            "destination": "0282",
-            "link_capacity": null,
-            "weight": 95
-        },
-        "84": {
-            "origin": "0282",
-            "destination": "0281",
-            "link_capacity": null,
-            "weight": 64
-        },
-        "85": {
-            "origin": "0281",
-            "destination": "0280",
-            "link_capacity": null,
-            "weight": 134
-        },
-        "86": {
-            "origin": "0280",
-            "destination": "0279",
-            "link_capacity": null,
-            "weight": 54
-        },
-        "87": {
-            "origin": "0279",
-            "destination": "0278",
-            "link_capacity": null,
-            "weight": 79
-        },
-        "88": {
-            "origin": "0278",
-            "destination": "0277",
-            "link_capacity": null,
-            "weight": 161
-        },
-        "89": {
-            "origin": "0277",
-            "destination": "Merredin",
-            "link_capacity": null,
-            "weight": 323
-        },
-        "90": {
-            "origin": "Wooroloo",
-            "destination": "1065",
-            "link_capacity": null,
-            "weight": 3199
-        },
-        "91": {
-            "origin": "1065",
-            "destination": "0714",
-            "link_capacity": null,
-            "weight": 1750
-        },
-        "92": {
-            "origin": "0714",
-            "destination": "0715",
-            "link_capacity": null,
-            "weight": 10
-        },
-        "93": {
-            "origin": "0715",
-            "destination": "0717",
-            "link_capacity": null,
-            "weight": 445
-        },
-        "94": {
-            "origin": "0717",
-            "destination": "Merredin",
-            "link_capacity": null,
-            "weight": 2877
-        },
-        "95": {
-            "origin": "Wooroloo",
+            "origin": "0638",
             "destination": "4815",
             "link_capacity": null,
-            "weight": 588
+            "weight": 469.0
         },
-        "96": {
+        "2": {
+            "origin": "0638",
+            "destination": "0277",
+            "link_capacity": null,
+            "weight": 438.0
+        },
+        "3": {
+            "origin": "0597",
+            "destination": "Kellerberrin",
+            "link_capacity": null,
+            "weight": 1627.0
+        },
+        "4": {
+            "origin": "0286",
+            "destination": "4166A",
+            "link_capacity": null,
+            "weight": 127.0
+        },
+        "5": {
+            "origin": "4166A",
+            "destination": "York",
+            "link_capacity": null,
+            "weight": 1202.0
+        },
+        "6": {
+            "origin": "0752",
+            "destination": "Northam",
+            "link_capacity": null,
+            "weight": 133.0
+        },
+        "7": {
+            "origin": "Northam",
+            "destination": "4815",
+            "link_capacity": null,
+            "weight": 540.0
+        },
+        "8": {
             "origin": "4815",
             "destination": "4154",
             "link_capacity": null,
-            "weight": 324
+            "weight": 323.0
         },
-        "97": {
+        "9": {
             "origin": "4154",
             "destination": "4156",
             "link_capacity": null,
-            "weight": 377
+            "weight": 373.0
         },
-        "98": {
+        "10": {
             "origin": "4156",
+            "destination": "0283",
+            "link_capacity": null,
+            "weight": 53.0
+        },
+        "11": {
+            "origin": "0639",
+            "destination": "Meckering",
+            "link_capacity": null,
+            "weight": 2688.0
+        },
+        "12": {
+            "origin": "Meckering",
+            "destination": "Cunderdin",
+            "link_capacity": null,
+            "weight": 1086.0
+        },
+        "13": {
+            "origin": "Cunderdin",
+            "destination": "1065",
+            "link_capacity": null,
+            "weight": 239.0
+        },
+        "14": {
+            "origin": "1065",
+            "destination": "0714",
+            "link_capacity": null,
+            "weight": 1780.0
+        },
+        "15": {
+            "origin": "0714",
+            "destination": "0715",
+            "link_capacity": null,
+            "weight": 10.0
+        },
+        "16": {
+            "origin": "0715",
+            "destination": "0717",
+            "link_capacity": null,
+            "weight": 449.0
+        },
+        "17": {
+            "origin": "0717",
+            "destination": "5093",
+            "link_capacity": null,
+            "weight": 2884.0
+        },
+        "18": {
+            "origin": "0612",
+            "destination": "0613",
+            "link_capacity": null,
+            "weight": 208.0
+        },
+        "19": {
+            "origin": "0576",
+            "destination": "0290",
+            "link_capacity": null,
+            "weight": 475.0
+        },
+        "20": {
+            "origin": "0290",
+            "destination": "0291",
+            "link_capacity": null,
+            "weight": 59.0
+        },
+        "21": {
+            "origin": "0638",
+            "destination": "0612",
+            "link_capacity": null,
+            "weight": 112.0
+        },
+        "22": {
+            "origin": "0613",
+            "destination": "0277",
+            "link_capacity": null,
+            "weight": 268.0
+        },
+        "23": {
+            "origin": "1047",
+            "destination": "0612",
+            "link_capacity": null,
+            "weight": 563.0
+        },
+        "24": {
+            "origin": "0612",
+            "destination": "0277",
+            "link_capacity": null,
+            "weight": 322.0
+        },
+        "25": {
+            "origin": "1469",
+            "destination": "0612",
+            "link_capacity": null,
+            "weight": 257.0
+        },
+        "26": {
+            "origin": "Cunderdin",
+            "destination": "Kellerberrin",
+            "link_capacity": null,
+            "weight": 1785.0
+        },
+        "27": {
+            "origin": "Kellerberrin",
+            "destination": "1006",
+            "link_capacity": null,
+            "weight": 1269.0
+        },
+        "28": {
+            "origin": "1006",
+            "destination": "1007",
+            "link_capacity": null,
+            "weight": 7.0
+        },
+        "29": {
+            "origin": "1007",
+            "destination": "1050",
+            "link_capacity": null,
+            "weight": 282.0
+        },
+        "30": {
+            "origin": "1050",
+            "destination": "0627",
+            "link_capacity": null,
+            "weight": 337.0
+        },
+        "31": {
+            "origin": "0627",
             "destination": "Merredin",
             "link_capacity": null,
-            "weight": 53
+            "weight": 261.0
+        },
+        "32": {
+            "origin": "Northam ",
+            "destination": "0613",
+            "link_capacity": null,
+            "weight": NaN
+        },
+        "33": {
+            "origin": "0613",
+            "destination": "1149",
+            "link_capacity": null,
+            "weight": NaN
+        },
+        "34": {
+            "origin": "0305",
+            "destination": "0729",
+            "link_capacity": null,
+            "weight": 505.0
+        },
+        "35": {
+            "origin": "0729",
+            "destination": "0730",
+            "link_capacity": null,
+            "weight": 464.0
+        },
+        "36": {
+            "origin": "0730",
+            "destination": "0714",
+            "link_capacity": null,
+            "weight": 1793.0
+        },
+        "37": {
+            "origin": "0717",
+            "destination": "0596",
+            "link_capacity": null,
+            "weight": 805.0
+        },
+        "38": {
+            "origin": "0596",
+            "destination": "Kellerberrin",
+            "link_capacity": null,
+            "weight": 1938.0
+        },
+        "39": {
+            "origin": "Kellerberrin",
+            "destination": "0641",
+            "link_capacity": null,
+            "weight": 283.0
+        },
+        "40": {
+            "origin": "0641",
+            "destination": "Merredin",
+            "link_capacity": null,
+            "weight": 2449.0
+        },
+        "41": {
+            "origin": "York",
+            "destination": "0291",
+            "link_capacity": null,
+            "weight": 1565.0
+        },
+        "42": {
+            "origin": "York",
+            "destination": "4184",
+            "link_capacity": null,
+            "weight": 1510.0
+        },
+        "43": {
+            "origin": "4184",
+            "destination": "0289",
+            "link_capacity": null,
+            "weight": 250.0
+        },
+        "44": {
+            "origin": "0287",
+            "destination": "4556A",
+            "link_capacity": null,
+            "weight": 27.0
+        },
+        "45": {
+            "origin": "4556A",
+            "destination": "4151",
+            "link_capacity": null,
+            "weight": 1011.0
+        },
+        "46": {
+            "origin": "4151",
+            "destination": "Kellerberrin",
+            "link_capacity": null,
+            "weight": 2760.0
+        },
+        "47": {
+            "origin": "0288",
+            "destination": "4556A",
+            "link_capacity": null,
+            "weight": 32.0
+        },
+        "48": {
+            "origin": "0361",
+            "destination": "0612",
+            "link_capacity": null,
+            "weight": 589.0
+        },
+        "49": {
+            "origin": "0612",
+            "destination": "0752",
+            "link_capacity": null,
+            "weight": 55.0
+        },
+        "50": {
+            "origin": "0752",
+            "destination": "0753",
+            "link_capacity": null,
+            "weight": 250.0
+        },
+        "51": {
+            "origin": "0753",
+            "destination": "0754",
+            "link_capacity": null,
+            "weight": 8.0
+        },
+        "52": {
+            "origin": "0754",
+            "destination": "0761",
+            "link_capacity": null,
+            "weight": 540.0
+        },
+        "53": {
+            "origin": "0761",
+            "destination": "0762",
+            "link_capacity": null,
+            "weight": 124.0
+        },
+        "54": {
+            "origin": "0762",
+            "destination": "0763A",
+            "link_capacity": null,
+            "weight": 158.0
+        },
+        "55": {
+            "origin": "0763A",
+            "destination": "0765",
+            "link_capacity": null,
+            "weight": 636.0
+        },
+        "56": {
+            "origin": "0290",
+            "destination": "0289",
+            "link_capacity": null,
+            "weight": 241.0
+        },
+        "57": {
+            "origin": "0289",
+            "destination": "0288",
+            "link_capacity": null,
+            "weight": 28.0
+        },
+        "58": {
+            "origin": "0288",
+            "destination": "0287",
+            "link_capacity": null,
+            "weight": 27.0
+        },
+        "59": {
+            "origin": "0287",
+            "destination": "0286",
+            "link_capacity": null,
+            "weight": 116.0
+        },
+        "60": {
+            "origin": "0286",
+            "destination": "0285",
+            "link_capacity": null,
+            "weight": 20.0
+        },
+        "61": {
+            "origin": "0285",
+            "destination": "0284",
+            "link_capacity": null,
+            "weight": 73.0
+        },
+        "62": {
+            "origin": "0284",
+            "destination": "0283",
+            "link_capacity": null,
+            "weight": 21.0
+        },
+        "63": {
+            "origin": "0283",
+            "destination": "0282",
+            "link_capacity": null,
+            "weight": 94.0
+        },
+        "64": {
+            "origin": "0282",
+            "destination": "0281",
+            "link_capacity": null,
+            "weight": 63.0
+        },
+        "65": {
+            "origin": "0281",
+            "destination": "0280",
+            "link_capacity": null,
+            "weight": 132.0
+        },
+        "66": {
+            "origin": "0280",
+            "destination": "0279",
+            "link_capacity": null,
+            "weight": 54.0
+        },
+        "67": {
+            "origin": "0279",
+            "destination": "0278",
+            "link_capacity": null,
+            "weight": 78.0
+        },
+        "68": {
+            "origin": "0278",
+            "destination": "0277",
+            "link_capacity": null,
+            "weight": 159.0
+        },
+        "69": {
+            "origin": "0277",
+            "destination": "0752",
+            "link_capacity": null,
+            "weight": 324.0
+        },
+        "70": {
+            "origin": "0694",
+            "destination": "0361",
+            "link_capacity": null,
+            "weight": 477.0
+        },
+        "71": {
+            "origin": "0361",
+            "destination": "0638",
+            "link_capacity": null,
+            "weight": 558.0
+        },
+        "72": {
+            "origin": "0638",
+            "destination": "Northam",
+            "link_capacity": null,
+            "weight": 150.0
+        },
+        "73": {
+            "origin": "Northam",
+            "destination": "0277",
+            "link_capacity": null,
+            "weight": 388.0
+        },
+        "74": {
+            "origin": "0576",
+            "destination": "0291",
+            "link_capacity": null,
+            "weight": 482.0
+        },
+        "75": {
+            "origin": "0291",
+            "destination": "0299",
+            "link_capacity": null,
+            "weight": 338.0
+        },
+        "76": {
+            "origin": "0299",
+            "destination": "0300",
+            "link_capacity": null,
+            "weight": 70.0
+        },
+        "77": {
+            "origin": "0300",
+            "destination": "0301",
+            "link_capacity": null,
+            "weight": 152.0
+        },
+        "78": {
+            "origin": "0301",
+            "destination": "0302",
+            "link_capacity": null,
+            "weight": 102.0
+        },
+        "79": {
+            "origin": "0302",
+            "destination": "0303",
+            "link_capacity": null,
+            "weight": 68.0
+        },
+        "80": {
+            "origin": "0303",
+            "destination": "0304",
+            "link_capacity": null,
+            "weight": 6.0
+        },
+        "81": {
+            "origin": "0304",
+            "destination": "0305",
+            "link_capacity": null,
+            "weight": 110.0
+        },
+        "82": {
+            "origin": "0305",
+            "destination": "5093",
+            "link_capacity": null,
+            "weight": 6126.0
+        },
+        "83": {
+            "origin": "5093",
+            "destination": "5281",
+            "link_capacity": null,
+            "weight": 268.0
+        },
+        "84": {
+            "origin": "5281",
+            "destination": "5099A",
+            "link_capacity": null,
+            "weight": 169.0
+        },
+        "85": {
+            "origin": "5099A",
+            "destination": "6223A",
+            "link_capacity": null,
+            "weight": 340.0
+        },
+        "86": {
+            "origin": "6223A",
+            "destination": "5100A",
+            "link_capacity": null,
+            "weight": 3.0
+        },
+        "87": {
+            "origin": "5100A",
+            "destination": "Merredin",
+            "link_capacity": null,
+            "weight": 2420.0
+        },
+        "88": {
+            "origin": "Northam",
+            "destination": "0612",
+            "link_capacity": null,
+            "weight": 135.0
+        },
+        "89": {
+            "origin": "0612",
+            "destination": "9186",
+            "link_capacity": null,
+            "weight": 305.0
+        },
+        "90": {
+            "origin": "Wooroloo",
+            "destination": "4527",
+            "link_capacity": null,
+            "weight": 197.0
+        },
+        "91": {
+            "origin": "4527",
+            "destination": "0369",
+            "link_capacity": null,
+            "weight": 1053.0
+        },
+        "92": {
+            "origin": "0369",
+            "destination": "0692",
+            "link_capacity": null,
+            "weight": 303.0
+        },
+        "93": {
+            "origin": "0692",
+            "destination": "0693",
+            "link_capacity": null,
+            "weight": 77.0
+        },
+        "94": {
+            "origin": "0693",
+            "destination": "0694",
+            "link_capacity": null,
+            "weight": 11.0
+        },
+        "95": {
+            "origin": "0694",
+            "destination": "0631A",
+            "link_capacity": null,
+            "weight": 169.0
+        },
+        "96": {
+            "origin": "0631A",
+            "destination": "0632A",
+            "link_capacity": null,
+            "weight": 77.0
+        },
+        "97": {
+            "origin": "0632A",
+            "destination": "0633A",
+            "link_capacity": null,
+            "weight": 112.0
+        },
+        "98": {
+            "origin": "0633A",
+            "destination": "0634",
+            "link_capacity": null,
+            "weight": 482.0
+        },
+        "99": {
+            "origin": "0634",
+            "destination": "0637",
+            "link_capacity": null,
+            "weight": 762.0
+        },
+        "100": {
+            "origin": "0637",
+            "destination": "0765",
+            "link_capacity": null,
+            "weight": 433.0
+        },
+        "101": {
+            "origin": "0765",
+            "destination": "0639",
+            "link_capacity": null,
+            "weight": 863.0
+        },
+        "102": {
+            "origin": "0639",
+            "destination": "Merredin",
+            "link_capacity": null,
+            "weight": 5816.0
+        },
+        "103": {
+            "origin": "Wooroloo",
+            "destination": "0574",
+            "link_capacity": null,
+            "weight": 1160.0
+        },
+        "104": {
+            "origin": "0574",
+            "destination": "0576",
+            "link_capacity": null,
+            "weight": 621.0
+        },
+        "105": {
+            "origin": "0576",
+            "destination": "York",
+            "link_capacity": null,
+            "weight": 1959.0
+        },
+        "106": {
+            "origin": "York",
+            "destination": "0290",
+            "link_capacity": null,
+            "weight": 1506.0
+        },
+        "107": {
+            "origin": "0290",
+            "destination": "0579",
+            "link_capacity": null,
+            "weight": 88.0
+        },
+        "108": {
+            "origin": "0579",
+            "destination": "0580",
+            "link_capacity": null,
+            "weight": 50.0
+        },
+        "109": {
+            "origin": "0580",
+            "destination": "0897",
+            "link_capacity": null,
+            "weight": 586.0
+        },
+        "110": {
+            "origin": "0897",
+            "destination": "0898",
+            "link_capacity": null,
+            "weight": 115.0
+        },
+        "111": {
+            "origin": "0898",
+            "destination": "0589",
+            "link_capacity": null,
+            "weight": 203.0
+        },
+        "112": {
+            "origin": "0589",
+            "destination": "0592",
+            "link_capacity": null,
+            "weight": 297.0
+        },
+        "113": {
+            "origin": "0592",
+            "destination": "0596",
+            "link_capacity": null,
+            "weight": 1596.0
+        },
+        "114": {
+            "origin": "0596",
+            "destination": "0597",
+            "link_capacity": null,
+            "weight": 369.0
+        },
+        "115": {
+            "origin": "0597",
+            "destination": "0598",
+            "link_capacity": null,
+            "weight": 46.0
+        },
+        "116": {
+            "origin": "0598",
+            "destination": "0602",
+            "link_capacity": null,
+            "weight": 1063.0
+        },
+        "117": {
+            "origin": "0602",
+            "destination": "Merredin",
+            "link_capacity": null,
+            "weight": 2872.0
+        },
+        "118": {
+            "origin": "Wooroloo",
+            "destination": "0606",
+            "link_capacity": null,
+            "weight": 531.0
+        },
+        "119": {
+            "origin": "0606",
+            "destination": "9306",
+            "link_capacity": null,
+            "weight": 547.0
+        },
+        "120": {
+            "origin": "9306",
+            "destination": "1046",
+            "link_capacity": null,
+            "weight": 20.0
+        },
+        "121": {
+            "origin": "1046",
+            "destination": "1047",
+            "link_capacity": null,
+            "weight": 192.0
+        },
+        "122": {
+            "origin": "1047",
+            "destination": "9186",
+            "link_capacity": null,
+            "weight": 294.0
+        },
+        "123": {
+            "origin": "9186",
+            "destination": "1469",
+            "link_capacity": null,
+            "weight": 46.0
+        },
+        "124": {
+            "origin": "1469",
+            "destination": "1468",
+            "link_capacity": null,
+            "weight": 23.0
+        },
+        "125": {
+            "origin": "1468",
+            "destination": "1504",
+            "link_capacity": null,
+            "weight": 9.0
+        },
+        "126": {
+            "origin": "1504",
+            "destination": "1467",
+            "link_capacity": null,
+            "weight": 5.0
+        },
+        "127": {
+            "origin": "1467",
+            "destination": "1466",
+            "link_capacity": null,
+            "weight": 59.0
+        },
+        "128": {
+            "origin": "1466",
+            "destination": "1465",
+            "link_capacity": null,
+            "weight": 78.0
+        },
+        "129": {
+            "origin": "1465",
+            "destination": "1464",
+            "link_capacity": null,
+            "weight": 5.0
+        },
+        "130": {
+            "origin": "1464",
+            "destination": "1463",
+            "link_capacity": null,
+            "weight": 18.0
+        },
+        "131": {
+            "origin": "1463",
+            "destination": "9187",
+            "link_capacity": null,
+            "weight": 49.0
+        },
+        "132": {
+            "origin": "9187",
+            "destination": "1149",
+            "link_capacity": null,
+            "weight": 223.0
+        },
+        "133": {
+            "origin": "1149",
+            "destination": "1150",
+            "link_capacity": null,
+            "weight": 131.0
+        },
+        "134": {
+            "origin": "1150",
+            "destination": "1153",
+            "link_capacity": null,
+            "weight": 78.0
+        },
+        "135": {
+            "origin": "1153",
+            "destination": "1154",
+            "link_capacity": null,
+            "weight": 174.0
+        },
+        "136": {
+            "origin": "1154",
+            "destination": "0617",
+            "link_capacity": null,
+            "weight": 439.0
+        },
+        "137": {
+            "origin": "0617",
+            "destination": "Meckering",
+            "link_capacity": null,
+            "weight": 238.0
         }
     },
     "component_list": {
-       "Wooroloo": {
-            "component_type": null,
-            "component_class": null,
-            "cost_fraction": null,
-            "node_type": null,
-            "node_cluster": null,
-            "operation_capacity": null,
-            "pos_x": 435038.861,
-            "pos_y": 6481124.456,
-            "damages_states_constructor": null
-        },
-        "Merredin": {
-            "component_type": null,
-            "component_class": null,
-            "cost_fraction": null,
-            "node_type": null,
-            "node_cluster": null,
-            "operation_capacity": null,
-            "pos_x": 621897.975,
-            "pos_y": 6516130.64,
-            "damages_states_constructor": null
-        },
         "0277": {
             "component_type": null,
             "component_class": null,
@@ -908,6 +1141,39 @@
             "pos_y": 6501158.044765577,
             "damages_states_constructor": null
         },
+        "0369": {
+            "component_type": null,
+            "component_class": null,
+            "cost_fraction": null,
+            "node_type": null,
+            "node_cluster": null,
+            "operation_capacity": null,
+            "pos_x": 444579.4702607876,
+            "pos_y": 6501821.979712518,
+            "damages_states_constructor": null
+        },
+        "0375": {
+            "component_type": null,
+            "component_class": null,
+            "cost_fraction": null,
+            "node_type": null,
+            "node_cluster": null,
+            "operation_capacity": null,
+            "pos_x": 420052.54170160403,
+            "pos_y": 6446139.921955723,
+            "damages_states_constructor": null
+        },
+        "0377": {
+            "component_type": null,
+            "component_class": null,
+            "cost_fraction": null,
+            "node_type": null,
+            "node_cluster": null,
+            "operation_capacity": null,
+            "pos_x": 424426.5581398712,
+            "pos_y": 6442188.561348051,
+            "damages_states_constructor": null
+        },
         "0574": {
             "component_type": null,
             "component_class": null,
@@ -950,6 +1216,17 @@
             "operation_capacity": null,
             "pos_x": 479940.06184457673,
             "pos_y": 6470324.025990564,
+            "damages_states_constructor": null
+        },
+        "0587": {
+            "component_type": null,
+            "component_class": null,
+            "cost_fraction": null,
+            "node_type": null,
+            "node_cluster": null,
+            "operation_capacity": null,
+            "pos_x": 495731.98940820835,
+            "pos_y": 6467597.676044801,
             "damages_states_constructor": null
         },
         "0589": {
@@ -1029,6 +1306,28 @@
             "pos_y": 6484342.500788558,
             "damages_states_constructor": null
         },
+        "0608": {
+            "component_type": null,
+            "component_class": null,
+            "cost_fraction": null,
+            "node_type": null,
+            "node_cluster": null,
+            "operation_capacity": null,
+            "pos_x": 454696.7789577716,
+            "pos_y": 6490432.390291614,
+            "damages_states_constructor": null
+        },
+        "0610": {
+            "component_type": null,
+            "component_class": null,
+            "cost_fraction": null,
+            "node_type": null,
+            "node_cluster": null,
+            "operation_capacity": null,
+            "pos_x": 455017.9374566903,
+            "pos_y": 6491503.524104148,
+            "damages_states_constructor": null
+        },
         "0612": {
             "component_type": null,
             "component_class": null,
@@ -1049,6 +1348,28 @@
             "operation_capacity": null,
             "pos_x": 471272.3517459899,
             "pos_y": 6499105.519569967,
+            "damages_states_constructor": null
+        },
+        "0615": {
+            "component_type": null,
+            "component_class": null,
+            "cost_fraction": null,
+            "node_type": null,
+            "node_cluster": null,
+            "operation_capacity": null,
+            "pos_x": 477160.831224849,
+            "pos_y": 6500298.157776782,
+            "damages_states_constructor": null
+        },
+        "0616": {
+            "component_type": null,
+            "component_class": null,
+            "cost_fraction": null,
+            "node_type": null,
+            "node_cluster": null,
+            "operation_capacity": null,
+            "pos_x": 480322.20328599174,
+            "pos_y": 6500553.916820524,
             "damages_states_constructor": null
         },
         "0617": {
@@ -1139,6 +1460,17 @@
             "pos_y": 6531357.938142266,
             "damages_states_constructor": null
         },
+        "0638": {
+            "component_type": null,
+            "component_class": null,
+            "cost_fraction": null,
+            "node_type": null,
+            "node_cluster": null,
+            "operation_capacity": null,
+            "pos_x": 468385.84662308556,
+            "pos_y": 6497695.5603632,
+            "damages_states_constructor": null
+        },
         "0639": {
             "component_type": null,
             "component_class": null,
@@ -1148,6 +1480,17 @@
             "operation_capacity": null,
             "pos_x": 502684.1761740481,
             "pos_y": 6548428.412826864,
+            "damages_states_constructor": null
+        },
+        "0641": {
+            "component_type": null,
+            "component_class": null,
+            "cost_fraction": null,
+            "node_type": null,
+            "node_cluster": null,
+            "operation_capacity": null,
+            "pos_x": 568014.8913575463,
+            "pos_y": 6504355.600563351,
             "damages_states_constructor": null
         },
         "0692": {
@@ -1181,6 +1524,138 @@
             "operation_capacity": null,
             "pos_x": 450683.12199709285,
             "pos_y": 6506796.3900917815,
+            "damages_states_constructor": null
+        },
+        "0695": {
+            "component_type": null,
+            "component_class": null,
+            "cost_fraction": null,
+            "node_type": null,
+            "node_cluster": null,
+            "operation_capacity": null,
+            "pos_x": 449089.35492080706,
+            "pos_y": 6509335.350879395,
+            "damages_states_constructor": null
+        },
+        "0697": {
+            "component_type": null,
+            "component_class": null,
+            "cost_fraction": null,
+            "node_type": null,
+            "node_cluster": null,
+            "operation_capacity": null,
+            "pos_x": 447936.7977071846,
+            "pos_y": 6513956.51869303,
+            "damages_states_constructor": null
+        },
+        "0698": {
+            "component_type": null,
+            "component_class": null,
+            "cost_fraction": null,
+            "node_type": null,
+            "node_cluster": null,
+            "operation_capacity": null,
+            "pos_x": 447143.54663318617,
+            "pos_y": 6514900.749372159,
+            "damages_states_constructor": null
+        },
+        "0702": {
+            "component_type": null,
+            "component_class": null,
+            "cost_fraction": null,
+            "node_type": null,
+            "node_cluster": null,
+            "operation_capacity": null,
+            "pos_x": 454864.7929046496,
+            "pos_y": 6532559.476802915,
+            "damages_states_constructor": null
+        },
+        "0704": {
+            "component_type": null,
+            "component_class": null,
+            "cost_fraction": null,
+            "node_type": null,
+            "node_cluster": null,
+            "operation_capacity": null,
+            "pos_x": 453013.51405271585,
+            "pos_y": 6540802.07892501,
+            "damages_states_constructor": null
+        },
+        "0705": {
+            "component_type": null,
+            "component_class": null,
+            "cost_fraction": null,
+            "node_type": null,
+            "node_cluster": null,
+            "operation_capacity": null,
+            "pos_x": 448293.67063178285,
+            "pos_y": 6557508.443276173,
+            "damages_states_constructor": null
+        },
+        "0708": {
+            "component_type": null,
+            "component_class": null,
+            "cost_fraction": null,
+            "node_type": null,
+            "node_cluster": null,
+            "operation_capacity": null,
+            "pos_x": 446228.5374498213,
+            "pos_y": 6519352.006997056,
+            "damages_states_constructor": null
+        },
+        "0714": {
+            "component_type": null,
+            "component_class": null,
+            "cost_fraction": null,
+            "node_type": null,
+            "node_cluster": null,
+            "operation_capacity": null,
+            "pos_x": 540194.058705047,
+            "pos_y": 6453093.828265678,
+            "damages_states_constructor": null
+        },
+        "0715": {
+            "component_type": null,
+            "component_class": null,
+            "cost_fraction": null,
+            "node_type": null,
+            "node_cluster": null,
+            "operation_capacity": null,
+            "pos_x": 540417.2088192248,
+            "pos_y": 6452948.845035964,
+            "damages_states_constructor": null
+        },
+        "0717": {
+            "component_type": null,
+            "component_class": null,
+            "cost_fraction": null,
+            "node_type": null,
+            "node_cluster": null,
+            "operation_capacity": null,
+            "pos_x": 550932.7651279283,
+            "pos_y": 6451163.601557279,
+            "damages_states_constructor": null
+        },
+        "0729": {
+            "component_type": null,
+            "component_class": null,
+            "cost_fraction": null,
+            "node_type": null,
+            "node_cluster": null,
+            "operation_capacity": null,
+            "pos_x": 493369.98039530753,
+            "pos_y": 6447677.5171637125,
+            "damages_states_constructor": null
+        },
+        "0730": {
+            "component_type": null,
+            "component_class": null,
+            "cost_fraction": null,
+            "node_type": null,
+            "node_cluster": null,
+            "operation_capacity": null,
+            "pos_x": 500883.75683099125,
+            "pos_y": 6454489.439226495,
             "damages_states_constructor": null
         },
         "0752": {
@@ -1260,6 +1735,17 @@
             "pos_y": 6537643.558098665,
             "damages_states_constructor": null
         },
+        "0829": {
+            "component_type": null,
+            "component_class": null,
+            "cost_fraction": null,
+            "node_type": null,
+            "node_cluster": null,
+            "operation_capacity": null,
+            "pos_x": 420522.3416072455,
+            "pos_y": 6464087.168839189,
+            "damages_states_constructor": null
+        },
         "0897": {
             "component_type": null,
             "component_class": null,
@@ -1335,6 +1821,28 @@
             "operation_capacity": null,
             "pos_x": 608919.8471970422,
             "pos_y": 6511794.945983396,
+            "damages_states_constructor": null
+        },
+        "1051": {
+            "component_type": null,
+            "component_class": null,
+            "cost_fraction": null,
+            "node_type": null,
+            "node_cluster": null,
+            "operation_capacity": null,
+            "pos_x": 483281.46865057724,
+            "pos_y": 6547835.080159159,
+            "damages_states_constructor": null
+        },
+        "1065": {
+            "component_type": null,
+            "component_class": null,
+            "cost_fraction": null,
+            "node_type": null,
+            "node_cluster": null,
+            "operation_capacity": null,
+            "pos_x": 523897.73266548594,
+            "pos_y": 6493959.959340162,
             "damages_states_constructor": null
         },
         "1149": {
@@ -1469,6 +1977,369 @@
             "pos_y": 6499776.0335974395,
             "damages_states_constructor": null
         },
+        "3195A": {
+            "component_type": null,
+            "component_class": null,
+            "cost_fraction": null,
+            "node_type": null,
+            "node_cluster": null,
+            "operation_capacity": null,
+            "pos_x": 484505.37508973025,
+            "pos_y": 6446622.164554715,
+            "damages_states_constructor": null
+        },
+        "3197": {
+            "component_type": null,
+            "component_class": null,
+            "cost_fraction": null,
+            "node_type": null,
+            "node_cluster": null,
+            "operation_capacity": null,
+            "pos_x": 480984.15341727174,
+            "pos_y": 6441199.606367139,
+            "damages_states_constructor": null
+        },
+        "3205": {
+            "component_type": null,
+            "component_class": null,
+            "cost_fraction": null,
+            "node_type": null,
+            "node_cluster": null,
+            "operation_capacity": null,
+            "pos_x": 496466.48407344706,
+            "pos_y": 6445786.948674638,
+            "damages_states_constructor": null
+        },
+        "3208A": {
+            "component_type": null,
+            "component_class": null,
+            "cost_fraction": null,
+            "node_type": null,
+            "node_cluster": null,
+            "operation_capacity": null,
+            "pos_x": 488835.95979851444,
+            "pos_y": 6450401.2086413745,
+            "damages_states_constructor": null
+        },
+        "3209": {
+            "component_type": null,
+            "component_class": null,
+            "cost_fraction": null,
+            "node_type": null,
+            "node_cluster": null,
+            "operation_capacity": null,
+            "pos_x": 508583.1070253744,
+            "pos_y": 6444266.804691115,
+            "damages_states_constructor": null
+        },
+        "3210": {
+            "component_type": null,
+            "component_class": null,
+            "cost_fraction": null,
+            "node_type": null,
+            "node_cluster": null,
+            "operation_capacity": null,
+            "pos_x": 476377.51391494495,
+            "pos_y": 6448710.1519770725,
+            "damages_states_constructor": null
+        },
+        "3211": {
+            "component_type": null,
+            "component_class": null,
+            "cost_fraction": null,
+            "node_type": null,
+            "node_cluster": null,
+            "operation_capacity": null,
+            "pos_x": 478108.68490956933,
+            "pos_y": 6446025.9150787555,
+            "damages_states_constructor": null
+        },
+        "3213A": {
+            "component_type": null,
+            "component_class": null,
+            "cost_fraction": null,
+            "node_type": null,
+            "node_cluster": null,
+            "operation_capacity": null,
+            "pos_x": 496881.4852691038,
+            "pos_y": 6455162.262281632,
+            "damages_states_constructor": null
+        },
+        "3220B": {
+            "component_type": null,
+            "component_class": null,
+            "cost_fraction": null,
+            "node_type": null,
+            "node_cluster": null,
+            "operation_capacity": null,
+            "pos_x": 503918.3100025515,
+            "pos_y": 6461090.1870161835,
+            "damages_states_constructor": null
+        },
+        "4046": {
+            "component_type": null,
+            "component_class": null,
+            "cost_fraction": null,
+            "node_type": null,
+            "node_cluster": null,
+            "operation_capacity": null,
+            "pos_x": 446991.254325276,
+            "pos_y": 6559744.570860468,
+            "damages_states_constructor": null
+        },
+        "4050": {
+            "component_type": null,
+            "component_class": null,
+            "cost_fraction": null,
+            "node_type": null,
+            "node_cluster": null,
+            "operation_capacity": null,
+            "pos_x": 452936.16149690887,
+            "pos_y": 6539218.802128917,
+            "damages_states_constructor": null
+        },
+        "4053": {
+            "component_type": null,
+            "component_class": null,
+            "cost_fraction": null,
+            "node_type": null,
+            "node_cluster": null,
+            "operation_capacity": null,
+            "pos_x": 579469.701147517,
+            "pos_y": 6456761.094308553,
+            "damages_states_constructor": null
+        },
+        "4055": {
+            "component_type": null,
+            "component_class": null,
+            "cost_fraction": null,
+            "node_type": null,
+            "node_cluster": null,
+            "operation_capacity": null,
+            "pos_x": 579306.7679934902,
+            "pos_y": 6469137.637657865,
+            "damages_states_constructor": null
+        },
+        "4056": {
+            "component_type": null,
+            "component_class": null,
+            "cost_fraction": null,
+            "node_type": null,
+            "node_cluster": null,
+            "operation_capacity": null,
+            "pos_x": 606712.0615736919,
+            "pos_y": 6439740.530659838,
+            "damages_states_constructor": null
+        },
+        "4059A": {
+            "component_type": null,
+            "component_class": null,
+            "cost_fraction": null,
+            "node_type": null,
+            "node_cluster": null,
+            "operation_capacity": null,
+            "pos_x": 592733.1299530902,
+            "pos_y": 6467039.255389708,
+            "damages_states_constructor": null
+        },
+        "4061": {
+            "component_type": null,
+            "component_class": null,
+            "cost_fraction": null,
+            "node_type": null,
+            "node_cluster": null,
+            "operation_capacity": null,
+            "pos_x": 609307.8539795302,
+            "pos_y": 6453504.763042102,
+            "damages_states_constructor": null
+        },
+        "4065A": {
+            "component_type": null,
+            "component_class": null,
+            "cost_fraction": null,
+            "node_type": null,
+            "node_cluster": null,
+            "operation_capacity": null,
+            "pos_x": 587247.0734995774,
+            "pos_y": 6464264.410890965,
+            "damages_states_constructor": null
+        },
+        "4069A": {
+            "component_type": null,
+            "component_class": null,
+            "cost_fraction": null,
+            "node_type": null,
+            "node_cluster": null,
+            "operation_capacity": null,
+            "pos_x": 622222.9068601598,
+            "pos_y": 6516442.037920495,
+            "damages_states_constructor": null
+        },
+        "4070": {
+            "component_type": null,
+            "component_class": null,
+            "cost_fraction": null,
+            "node_type": null,
+            "node_cluster": null,
+            "operation_capacity": null,
+            "pos_x": 621462.351256082,
+            "pos_y": 6516750.366865503,
+            "damages_states_constructor": null
+        },
+        "4071": {
+            "component_type": null,
+            "component_class": null,
+            "cost_fraction": null,
+            "node_type": null,
+            "node_cluster": null,
+            "operation_capacity": null,
+            "pos_x": 621206.54798168,
+            "pos_y": 6516698.358137095,
+            "damages_states_constructor": null
+        },
+        "4072": {
+            "component_type": null,
+            "component_class": null,
+            "cost_fraction": null,
+            "node_type": null,
+            "node_cluster": null,
+            "operation_capacity": null,
+            "pos_x": 620951.6609390082,
+            "pos_y": 6516718.494145017,
+            "damages_states_constructor": null
+        },
+        "4080": {
+            "component_type": null,
+            "component_class": null,
+            "cost_fraction": null,
+            "node_type": null,
+            "node_cluster": null,
+            "operation_capacity": null,
+            "pos_x": 444870.9921313516,
+            "pos_y": 6511464.4624865055,
+            "damages_states_constructor": null
+        },
+        "4081": {
+            "component_type": null,
+            "component_class": null,
+            "cost_fraction": null,
+            "node_type": null,
+            "node_cluster": null,
+            "operation_capacity": null,
+            "pos_x": 450285.22880295303,
+            "pos_y": 6524606.533322835,
+            "damages_states_constructor": null
+        },
+        "4083": {
+            "component_type": null,
+            "component_class": null,
+            "cost_fraction": null,
+            "node_type": null,
+            "node_cluster": null,
+            "operation_capacity": null,
+            "pos_x": 452858.5730219084,
+            "pos_y": 6515697.958171731,
+            "damages_states_constructor": null
+        },
+        "4084": {
+            "component_type": null,
+            "component_class": null,
+            "cost_fraction": null,
+            "node_type": null,
+            "node_cluster": null,
+            "operation_capacity": null,
+            "pos_x": 454084.45261847106,
+            "pos_y": 6506938.34386144,
+            "damages_states_constructor": null
+        },
+        "4085": {
+            "component_type": null,
+            "component_class": null,
+            "cost_fraction": null,
+            "node_type": null,
+            "node_cluster": null,
+            "operation_capacity": null,
+            "pos_x": 447813.20965931914,
+            "pos_y": 6511428.544357913,
+            "damages_states_constructor": null
+        },
+        "4087": {
+            "component_type": null,
+            "component_class": null,
+            "cost_fraction": null,
+            "node_type": null,
+            "node_cluster": null,
+            "operation_capacity": null,
+            "pos_x": 453795.66647225834,
+            "pos_y": 6516539.42398028,
+            "damages_states_constructor": null
+        },
+        "4088": {
+            "component_type": null,
+            "component_class": null,
+            "cost_fraction": null,
+            "node_type": null,
+            "node_cluster": null,
+            "operation_capacity": null,
+            "pos_x": 446633.7177633618,
+            "pos_y": 6517447.55437031,
+            "damages_states_constructor": null
+        },
+        "4089": {
+            "component_type": null,
+            "component_class": null,
+            "cost_fraction": null,
+            "node_type": null,
+            "node_cluster": null,
+            "operation_capacity": null,
+            "pos_x": 454131.71123998094,
+            "pos_y": 6534129.70434583,
+            "damages_states_constructor": null
+        },
+        "4090A": {
+            "component_type": null,
+            "component_class": null,
+            "cost_fraction": null,
+            "node_type": null,
+            "node_cluster": null,
+            "operation_capacity": null,
+            "pos_x": 439784.46776541194,
+            "pos_y": 6505940.735126128,
+            "damages_states_constructor": null
+        },
+        "4091": {
+            "component_type": null,
+            "component_class": null,
+            "cost_fraction": null,
+            "node_type": null,
+            "node_cluster": null,
+            "operation_capacity": null,
+            "pos_x": 500920.9486973244,
+            "pos_y": 6497696.916576246,
+            "damages_states_constructor": null
+        },
+        "4092": {
+            "component_type": null,
+            "component_class": null,
+            "cost_fraction": null,
+            "node_type": null,
+            "node_cluster": null,
+            "operation_capacity": null,
+            "pos_x": 500553.5793357631,
+            "pos_y": 6501341.7901714705,
+            "damages_states_constructor": null
+        },
+        "4093A": {
+            "component_type": null,
+            "component_class": null,
+            "cost_fraction": null,
+            "node_type": null,
+            "node_cluster": null,
+            "operation_capacity": null,
+            "pos_x": 570131.1253582311,
+            "pos_y": 6497083.034531924,
+            "damages_states_constructor": null
+        },
         "4096": {
             "component_type": null,
             "component_class": null,
@@ -1478,6 +2349,226 @@
             "operation_capacity": null,
             "pos_x": 569288.552174696,
             "pos_y": 6503281.070294682,
+            "damages_states_constructor": null
+        },
+        "4102": {
+            "component_type": null,
+            "component_class": null,
+            "cost_fraction": null,
+            "node_type": null,
+            "node_cluster": null,
+            "operation_capacity": null,
+            "pos_x": 458404.9912103047,
+            "pos_y": 6488071.675561445,
+            "damages_states_constructor": null
+        },
+        "4103": {
+            "component_type": null,
+            "component_class": null,
+            "cost_fraction": null,
+            "node_type": null,
+            "node_cluster": null,
+            "operation_capacity": null,
+            "pos_x": 455945.43842936266,
+            "pos_y": 6489981.238841401,
+            "damages_states_constructor": null
+        },
+        "4108": {
+            "component_type": null,
+            "component_class": null,
+            "cost_fraction": null,
+            "node_type": null,
+            "node_cluster": null,
+            "operation_capacity": null,
+            "pos_x": 484591.22409132315,
+            "pos_y": 6491445.564275143,
+            "damages_states_constructor": null
+        },
+        "4109": {
+            "component_type": null,
+            "component_class": null,
+            "cost_fraction": null,
+            "node_type": null,
+            "node_cluster": null,
+            "operation_capacity": null,
+            "pos_x": 465267.86048427527,
+            "pos_y": 6506334.481130673,
+            "damages_states_constructor": null
+        },
+        "4112": {
+            "component_type": null,
+            "component_class": null,
+            "cost_fraction": null,
+            "node_type": null,
+            "node_cluster": null,
+            "operation_capacity": null,
+            "pos_x": 463538.45800656814,
+            "pos_y": 6491946.11865983,
+            "damages_states_constructor": null
+        },
+        "4113": {
+            "component_type": null,
+            "component_class": null,
+            "cost_fraction": null,
+            "node_type": null,
+            "node_cluster": null,
+            "operation_capacity": null,
+            "pos_x": 463094.89336266904,
+            "pos_y": 6492877.371537554,
+            "damages_states_constructor": null
+        },
+        "4114": {
+            "component_type": null,
+            "component_class": null,
+            "cost_fraction": null,
+            "node_type": null,
+            "node_cluster": null,
+            "operation_capacity": null,
+            "pos_x": 465837.3760243527,
+            "pos_y": 6500517.500041755,
+            "damages_states_constructor": null
+        },
+        "4116A": {
+            "component_type": null,
+            "component_class": null,
+            "cost_fraction": null,
+            "node_type": null,
+            "node_cluster": null,
+            "operation_capacity": null,
+            "pos_x": 457620.64069465187,
+            "pos_y": 6502008.195588076,
+            "damages_states_constructor": null
+        },
+        "4117": {
+            "component_type": null,
+            "component_class": null,
+            "cost_fraction": null,
+            "node_type": null,
+            "node_cluster": null,
+            "operation_capacity": null,
+            "pos_x": 465918.9477483043,
+            "pos_y": 6509989.493575882,
+            "damages_states_constructor": null
+        },
+        "4121": {
+            "component_type": null,
+            "component_class": null,
+            "cost_fraction": null,
+            "node_type": null,
+            "node_cluster": null,
+            "operation_capacity": null,
+            "pos_x": 460575.0776560386,
+            "pos_y": 6488116.442721467,
+            "damages_states_constructor": null
+        },
+        "4124": {
+            "component_type": null,
+            "component_class": null,
+            "cost_fraction": null,
+            "node_type": null,
+            "node_cluster": null,
+            "operation_capacity": null,
+            "pos_x": 467207.0682512896,
+            "pos_y": 6507690.560630083,
+            "damages_states_constructor": null
+        },
+        "4126A": {
+            "component_type": null,
+            "component_class": null,
+            "cost_fraction": null,
+            "node_type": null,
+            "node_cluster": null,
+            "operation_capacity": null,
+            "pos_x": 482832.2591741866,
+            "pos_y": 6510527.836509353,
+            "damages_states_constructor": null
+        },
+        "4128": {
+            "component_type": null,
+            "component_class": null,
+            "cost_fraction": null,
+            "node_type": null,
+            "node_cluster": null,
+            "operation_capacity": null,
+            "pos_x": 480363.22051294066,
+            "pos_y": 6499677.497237982,
+            "damages_states_constructor": null
+        },
+        "4140": {
+            "component_type": null,
+            "component_class": null,
+            "cost_fraction": null,
+            "node_type": null,
+            "node_cluster": null,
+            "operation_capacity": null,
+            "pos_x": 536212.0397863773,
+            "pos_y": 6474094.908096504,
+            "damages_states_constructor": null
+        },
+        "4142": {
+            "component_type": null,
+            "component_class": null,
+            "cost_fraction": null,
+            "node_type": null,
+            "node_cluster": null,
+            "operation_capacity": null,
+            "pos_x": 535848.3626307013,
+            "pos_y": 6447394.694291918,
+            "damages_states_constructor": null
+        },
+        "4143": {
+            "component_type": null,
+            "component_class": null,
+            "cost_fraction": null,
+            "node_type": null,
+            "node_cluster": null,
+            "operation_capacity": null,
+            "pos_x": 539009.6780256514,
+            "pos_y": 6465343.410363142,
+            "damages_states_constructor": null
+        },
+        "4145": {
+            "component_type": null,
+            "component_class": null,
+            "cost_fraction": null,
+            "node_type": null,
+            "node_cluster": null,
+            "operation_capacity": null,
+            "pos_x": 545180.5302792549,
+            "pos_y": 6463705.002535216,
+            "damages_states_constructor": null
+        },
+        "4146": {
+            "component_type": null,
+            "component_class": null,
+            "cost_fraction": null,
+            "node_type": null,
+            "node_cluster": null,
+            "operation_capacity": null,
+            "pos_x": 544875.0945064621,
+            "pos_y": 6464346.923698894,
+            "damages_states_constructor": null
+        },
+        "4148": {
+            "component_type": null,
+            "component_class": null,
+            "cost_fraction": null,
+            "node_type": null,
+            "node_cluster": null,
+            "operation_capacity": null,
+            "pos_x": 530057.6697431575,
+            "pos_y": 6456064.055264417,
+            "damages_states_constructor": null
+        },
+        "4149": {
+            "component_type": null,
+            "component_class": null,
+            "cost_fraction": null,
+            "node_type": null,
+            "node_cluster": null,
+            "operation_capacity": null,
+            "pos_x": 514235.62441356503,
+            "pos_y": 6474892.154405797,
             "damages_states_constructor": null
         },
         "4151": {
@@ -1491,6 +2582,237 @@
             "pos_y": 6479103.945495902,
             "damages_states_constructor": null
         },
+        "4152": {
+            "component_type": null,
+            "component_class": null,
+            "cost_fraction": null,
+            "node_type": null,
+            "node_cluster": null,
+            "operation_capacity": null,
+            "pos_x": 493410.3457436131,
+            "pos_y": 6483810.784582559,
+            "damages_states_constructor": null
+        },
+        "4153": {
+            "component_type": null,
+            "component_class": null,
+            "cost_fraction": null,
+            "node_type": null,
+            "node_cluster": null,
+            "operation_capacity": null,
+            "pos_x": 472435.7305516686,
+            "pos_y": 6451936.477152053,
+            "damages_states_constructor": null
+        },
+        "4154": {
+            "component_type": null,
+            "component_class": null,
+            "cost_fraction": null,
+            "node_type": null,
+            "node_cluster": null,
+            "operation_capacity": null,
+            "pos_x": 471876.7226417431,
+            "pos_y": 6484912.049114374,
+            "damages_states_constructor": null
+        },
+        "4156": {
+            "component_type": null,
+            "component_class": null,
+            "cost_fraction": null,
+            "node_type": null,
+            "node_cluster": null,
+            "operation_capacity": null,
+            "pos_x": 480362.9769775824,
+            "pos_y": 6480631.586534279,
+            "damages_states_constructor": null
+        },
+        "4157": {
+            "component_type": null,
+            "component_class": null,
+            "cost_fraction": null,
+            "node_type": null,
+            "node_cluster": null,
+            "operation_capacity": null,
+            "pos_x": 489143.0020818312,
+            "pos_y": 6487016.83474851,
+            "damages_states_constructor": null
+        },
+        "4158": {
+            "component_type": null,
+            "component_class": null,
+            "cost_fraction": null,
+            "node_type": null,
+            "node_cluster": null,
+            "operation_capacity": null,
+            "pos_x": 489176.79103085987,
+            "pos_y": 6487037.818717875,
+            "damages_states_constructor": null
+        },
+        "4161A": {
+            "component_type": null,
+            "component_class": null,
+            "cost_fraction": null,
+            "node_type": null,
+            "node_cluster": null,
+            "operation_capacity": null,
+            "pos_x": 482095.84806093905,
+            "pos_y": 6462100.880372375,
+            "damages_states_constructor": null
+        },
+        "4164": {
+            "component_type": null,
+            "component_class": null,
+            "cost_fraction": null,
+            "node_type": null,
+            "node_cluster": null,
+            "operation_capacity": null,
+            "pos_x": 482479.52668744157,
+            "pos_y": 6466184.975997379,
+            "damages_states_constructor": null
+        },
+        "4165": {
+            "component_type": null,
+            "component_class": null,
+            "cost_fraction": null,
+            "node_type": null,
+            "node_cluster": null,
+            "operation_capacity": null,
+            "pos_x": 499186.0551796014,
+            "pos_y": 6463413.046435904,
+            "damages_states_constructor": null
+        },
+        "4166A": {
+            "component_type": null,
+            "component_class": null,
+            "cost_fraction": null,
+            "node_type": null,
+            "node_cluster": null,
+            "operation_capacity": null,
+            "pos_x": 481467.64771253004,
+            "pos_y": 6477687.840621993,
+            "damages_states_constructor": null
+        },
+        "4170": {
+            "component_type": null,
+            "component_class": null,
+            "cost_fraction": null,
+            "node_type": null,
+            "node_cluster": null,
+            "operation_capacity": null,
+            "pos_x": 505534.58375061327,
+            "pos_y": 6482461.388985832,
+            "damages_states_constructor": null
+        },
+        "4184": {
+            "component_type": null,
+            "component_class": null,
+            "cost_fraction": null,
+            "node_type": null,
+            "node_cluster": null,
+            "operation_capacity": null,
+            "pos_x": 478345.5246631618,
+            "pos_y": 6471868.129385292,
+            "damages_states_constructor": null
+        },
+        "4189": {
+            "component_type": null,
+            "component_class": null,
+            "cost_fraction": null,
+            "node_type": null,
+            "node_cluster": null,
+            "operation_capacity": null,
+            "pos_x": 473056.5777467157,
+            "pos_y": 6516417.061476929,
+            "damages_states_constructor": null
+        },
+        "4195": {
+            "component_type": null,
+            "component_class": null,
+            "cost_fraction": null,
+            "node_type": null,
+            "node_cluster": null,
+            "operation_capacity": null,
+            "pos_x": 496378.94886358414,
+            "pos_y": 6490713.037233107,
+            "damages_states_constructor": null
+        },
+        "4196": {
+            "component_type": null,
+            "component_class": null,
+            "cost_fraction": null,
+            "node_type": null,
+            "node_cluster": null,
+            "operation_capacity": null,
+            "pos_x": 473178.3765792994,
+            "pos_y": 6521500.355356754,
+            "damages_states_constructor": null
+        },
+        "4197A": {
+            "component_type": null,
+            "component_class": null,
+            "cost_fraction": null,
+            "node_type": null,
+            "node_cluster": null,
+            "operation_capacity": null,
+            "pos_x": 476987.27367408894,
+            "pos_y": 6525766.225884957,
+            "damages_states_constructor": null
+        },
+        "4202": {
+            "component_type": null,
+            "component_class": null,
+            "cost_fraction": null,
+            "node_type": null,
+            "node_cluster": null,
+            "operation_capacity": null,
+            "pos_x": 476477.28309834877,
+            "pos_y": 6542164.098317379,
+            "damages_states_constructor": null
+        },
+        "4205": {
+            "component_type": null,
+            "component_class": null,
+            "cost_fraction": null,
+            "node_type": null,
+            "node_cluster": null,
+            "operation_capacity": null,
+            "pos_x": 463788.06884964067,
+            "pos_y": 6516290.326216973,
+            "damages_states_constructor": null
+        },
+        "4399": {
+            "component_type": null,
+            "component_class": null,
+            "cost_fraction": null,
+            "node_type": null,
+            "node_cluster": null,
+            "operation_capacity": null,
+            "pos_x": 469557.8277366219,
+            "pos_y": 6498579.350101335,
+            "damages_states_constructor": null
+        },
+        "4490": {
+            "component_type": null,
+            "component_class": null,
+            "cost_fraction": null,
+            "node_type": null,
+            "node_cluster": null,
+            "operation_capacity": null,
+            "pos_x": 423250.82482579903,
+            "pos_y": 6487896.9543575905,
+            "damages_states_constructor": null
+        },
+        "4491": {
+            "component_type": null,
+            "component_class": null,
+            "cost_fraction": null,
+            "node_type": null,
+            "node_cluster": null,
+            "operation_capacity": null,
+            "pos_x": 423233.2952981319,
+            "pos_y": 6487095.82802584,
+            "damages_states_constructor": null
+        },
         "4527": {
             "component_type": null,
             "component_class": null,
@@ -1500,6 +2822,292 @@
             "operation_capacity": null,
             "pos_x": 434265.0702648937,
             "pos_y": 6484278.181153489,
+            "damages_states_constructor": null
+        },
+        "4556A": {
+            "component_type": null,
+            "component_class": null,
+            "cost_fraction": null,
+            "node_type": null,
+            "node_cluster": null,
+            "operation_capacity": null,
+            "pos_x": 482316.9321108531,
+            "pos_y": 6475025.953013495,
+            "damages_states_constructor": null
+        },
+        "4654": {
+            "component_type": null,
+            "component_class": null,
+            "cost_fraction": null,
+            "node_type": null,
+            "node_cluster": null,
+            "operation_capacity": null,
+            "pos_x": 474466.580238216,
+            "pos_y": 6495991.922669517,
+            "damages_states_constructor": null
+        },
+        "4665": {
+            "component_type": null,
+            "component_class": null,
+            "cost_fraction": null,
+            "node_type": null,
+            "node_cluster": null,
+            "operation_capacity": null,
+            "pos_x": 470236.842002047,
+            "pos_y": 6510406.529152611,
+            "damages_states_constructor": null
+        },
+        "4674A": {
+            "component_type": null,
+            "component_class": null,
+            "cost_fraction": null,
+            "node_type": null,
+            "node_cluster": null,
+            "operation_capacity": null,
+            "pos_x": 469328.8928730151,
+            "pos_y": 6477031.421724084,
+            "damages_states_constructor": null
+        },
+        "4683": {
+            "component_type": null,
+            "component_class": null,
+            "cost_fraction": null,
+            "node_type": null,
+            "node_cluster": null,
+            "operation_capacity": null,
+            "pos_x": 499661.796540968,
+            "pos_y": 6489902.335327394,
+            "damages_states_constructor": null
+        },
+        "4684": {
+            "component_type": null,
+            "component_class": null,
+            "cost_fraction": null,
+            "node_type": null,
+            "node_cluster": null,
+            "operation_capacity": null,
+            "pos_x": 512815.6582118211,
+            "pos_y": 6502378.732991921,
+            "damages_states_constructor": null
+        },
+        "4686": {
+            "component_type": null,
+            "component_class": null,
+            "cost_fraction": null,
+            "node_type": null,
+            "node_cluster": null,
+            "operation_capacity": null,
+            "pos_x": 488124.0287146071,
+            "pos_y": 6555237.224772855,
+            "damages_states_constructor": null
+        },
+        "4694": {
+            "component_type": null,
+            "component_class": null,
+            "cost_fraction": null,
+            "node_type": null,
+            "node_cluster": null,
+            "operation_capacity": null,
+            "pos_x": 516169.695073699,
+            "pos_y": 6468677.812011874,
+            "damages_states_constructor": null
+        },
+        "4695": {
+            "component_type": null,
+            "component_class": null,
+            "cost_fraction": null,
+            "node_type": null,
+            "node_cluster": null,
+            "operation_capacity": null,
+            "pos_x": 541816.1560772444,
+            "pos_y": 6465190.002525437,
+            "damages_states_constructor": null
+        },
+        "4696": {
+            "component_type": null,
+            "component_class": null,
+            "cost_fraction": null,
+            "node_type": null,
+            "node_cluster": null,
+            "operation_capacity": null,
+            "pos_x": 529433.6536374239,
+            "pos_y": 6463747.366901143,
+            "damages_states_constructor": null
+        },
+        "4774": {
+            "component_type": null,
+            "component_class": null,
+            "cost_fraction": null,
+            "node_type": null,
+            "node_cluster": null,
+            "operation_capacity": null,
+            "pos_x": 423904.86559127155,
+            "pos_y": 6447628.790101912,
+            "damages_states_constructor": null
+        },
+        "4815": {
+            "component_type": null,
+            "component_class": null,
+            "cost_fraction": null,
+            "node_type": null,
+            "node_cluster": null,
+            "operation_capacity": null,
+            "pos_x": 467668.6627806113,
+            "pos_y": 6490288.745561229,
+            "damages_states_constructor": null
+        },
+        "4816": {
+            "component_type": null,
+            "component_class": null,
+            "cost_fraction": null,
+            "node_type": null,
+            "node_cluster": null,
+            "operation_capacity": null,
+            "pos_x": 500007.0842675542,
+            "pos_y": 6459732.565640552,
+            "damages_states_constructor": null
+        },
+        "4852": {
+            "component_type": null,
+            "component_class": null,
+            "cost_fraction": null,
+            "node_type": null,
+            "node_cluster": null,
+            "operation_capacity": null,
+            "pos_x": 419096.37318388326,
+            "pos_y": 6508172.021819152,
+            "damages_states_constructor": null
+        },
+        "4876": {
+            "component_type": null,
+            "component_class": null,
+            "cost_fraction": null,
+            "node_type": null,
+            "node_cluster": null,
+            "operation_capacity": null,
+            "pos_x": 445607.1894712704,
+            "pos_y": 6511709.96939005,
+            "damages_states_constructor": null
+        },
+        "4883": {
+            "component_type": null,
+            "component_class": null,
+            "cost_fraction": null,
+            "node_type": null,
+            "node_cluster": null,
+            "operation_capacity": null,
+            "pos_x": 581415.872074764,
+            "pos_y": 6450365.546968343,
+            "damages_states_constructor": null
+        },
+        "4885": {
+            "component_type": null,
+            "component_class": null,
+            "cost_fraction": null,
+            "node_type": null,
+            "node_cluster": null,
+            "operation_capacity": null,
+            "pos_x": 593062.2826957639,
+            "pos_y": 6466420.787506668,
+            "damages_states_constructor": null
+        },
+        "4908": {
+            "component_type": null,
+            "component_class": null,
+            "cost_fraction": null,
+            "node_type": null,
+            "node_cluster": null,
+            "operation_capacity": null,
+            "pos_x": 426518.5205006633,
+            "pos_y": 6485696.799929304,
+            "damages_states_constructor": null
+        },
+        "4920": {
+            "component_type": null,
+            "component_class": null,
+            "cost_fraction": null,
+            "node_type": null,
+            "node_cluster": null,
+            "operation_capacity": null,
+            "pos_x": 468762.8392033506,
+            "pos_y": 6457739.365546464,
+            "damages_states_constructor": null
+        },
+        "4927": {
+            "component_type": null,
+            "component_class": null,
+            "cost_fraction": null,
+            "node_type": null,
+            "node_cluster": null,
+            "operation_capacity": null,
+            "pos_x": 500221.5126625632,
+            "pos_y": 6460250.418874627,
+            "damages_states_constructor": null
+        },
+        "4972A": {
+            "component_type": null,
+            "component_class": null,
+            "cost_fraction": null,
+            "node_type": null,
+            "node_cluster": null,
+            "operation_capacity": null,
+            "pos_x": 426811.9549440714,
+            "pos_y": 6483359.53877762,
+            "damages_states_constructor": null
+        },
+        "4978": {
+            "component_type": null,
+            "component_class": null,
+            "cost_fraction": null,
+            "node_type": null,
+            "node_cluster": null,
+            "operation_capacity": null,
+            "pos_x": 477066.51483705227,
+            "pos_y": 6536731.693217423,
+            "damages_states_constructor": null
+        },
+        "4984": {
+            "component_type": null,
+            "component_class": null,
+            "cost_fraction": null,
+            "node_type": null,
+            "node_cluster": null,
+            "operation_capacity": null,
+            "pos_x": 598802.5597224587,
+            "pos_y": 6439820.659118101,
+            "damages_states_constructor": null
+        },
+        "4985": {
+            "component_type": null,
+            "component_class": null,
+            "cost_fraction": null,
+            "node_type": null,
+            "node_cluster": null,
+            "operation_capacity": null,
+            "pos_x": 570964.2940803736,
+            "pos_y": 6461091.378239296,
+            "damages_states_constructor": null
+        },
+        "4987": {
+            "component_type": null,
+            "component_class": null,
+            "cost_fraction": null,
+            "node_type": null,
+            "node_cluster": null,
+            "operation_capacity": null,
+            "pos_x": 569138.2132920859,
+            "pos_y": 6476254.880179878,
+            "damages_states_constructor": null
+        },
+        "4988": {
+            "component_type": null,
+            "component_class": null,
+            "cost_fraction": null,
+            "node_type": null,
+            "node_cluster": null,
+            "operation_capacity": null,
+            "pos_x": 615122.1678940264,
+            "pos_y": 6452884.186559331,
             "damages_states_constructor": null
         },
         "4989": {
@@ -1513,6 +3121,325 @@
             "pos_y": 6450193.724856015,
             "damages_states_constructor": null
         },
+        "4994": {
+            "component_type": null,
+            "component_class": null,
+            "cost_fraction": null,
+            "node_type": null,
+            "node_cluster": null,
+            "operation_capacity": null,
+            "pos_x": 584669.4188376663,
+            "pos_y": 6448076.624004301,
+            "damages_states_constructor": null
+        },
+        "4995": {
+            "component_type": null,
+            "component_class": null,
+            "cost_fraction": null,
+            "node_type": null,
+            "node_cluster": null,
+            "operation_capacity": null,
+            "pos_x": 596589.7896584405,
+            "pos_y": 6439848.623431287,
+            "damages_states_constructor": null
+        },
+        "4996": {
+            "component_type": null,
+            "component_class": null,
+            "cost_fraction": null,
+            "node_type": null,
+            "node_cluster": null,
+            "operation_capacity": null,
+            "pos_x": 623012.1657074558,
+            "pos_y": 6471091.088299646,
+            "damages_states_constructor": null
+        },
+        "5008": {
+            "component_type": null,
+            "component_class": null,
+            "cost_fraction": null,
+            "node_type": null,
+            "node_cluster": null,
+            "operation_capacity": null,
+            "pos_x": 597995.7381809391,
+            "pos_y": 6476757.334435184,
+            "damages_states_constructor": null
+        },
+        "5009": {
+            "component_type": null,
+            "component_class": null,
+            "cost_fraction": null,
+            "node_type": null,
+            "node_cluster": null,
+            "operation_capacity": null,
+            "pos_x": 593865.2098309072,
+            "pos_y": 6476230.529861828,
+            "damages_states_constructor": null
+        },
+        "5012": {
+            "component_type": null,
+            "component_class": null,
+            "cost_fraction": null,
+            "node_type": null,
+            "node_cluster": null,
+            "operation_capacity": null,
+            "pos_x": 588396.0910943015,
+            "pos_y": 6476428.254766049,
+            "damages_states_constructor": null
+        },
+        "5013": {
+            "component_type": null,
+            "component_class": null,
+            "cost_fraction": null,
+            "node_type": null,
+            "node_cluster": null,
+            "operation_capacity": null,
+            "pos_x": 605302.4871392758,
+            "pos_y": 6482281.938933482,
+            "damages_states_constructor": null
+        },
+        "5014": {
+            "component_type": null,
+            "component_class": null,
+            "cost_fraction": null,
+            "node_type": null,
+            "node_cluster": null,
+            "operation_capacity": null,
+            "pos_x": 604500.4830005633,
+            "pos_y": 6474496.870025888,
+            "damages_states_constructor": null
+        },
+        "5016": {
+            "component_type": null,
+            "component_class": null,
+            "cost_fraction": null,
+            "node_type": null,
+            "node_cluster": null,
+            "operation_capacity": null,
+            "pos_x": 586435.6684581721,
+            "pos_y": 6473399.994175144,
+            "damages_states_constructor": null
+        },
+        "5017": {
+            "component_type": null,
+            "component_class": null,
+            "cost_fraction": null,
+            "node_type": null,
+            "node_cluster": null,
+            "operation_capacity": null,
+            "pos_x": 587483.5738507828,
+            "pos_y": 6474281.056101225,
+            "damages_states_constructor": null
+        },
+        "5018": {
+            "component_type": null,
+            "component_class": null,
+            "cost_fraction": null,
+            "node_type": null,
+            "node_cluster": null,
+            "operation_capacity": null,
+            "pos_x": 588020.658459267,
+            "pos_y": 6476400.660600195,
+            "damages_states_constructor": null
+        },
+        "5019": {
+            "component_type": null,
+            "component_class": null,
+            "cost_fraction": null,
+            "node_type": null,
+            "node_cluster": null,
+            "operation_capacity": null,
+            "pos_x": 606953.3357917946,
+            "pos_y": 6462017.519538408,
+            "damages_states_constructor": null
+        },
+        "5030": {
+            "component_type": null,
+            "component_class": null,
+            "cost_fraction": null,
+            "node_type": null,
+            "node_cluster": null,
+            "operation_capacity": null,
+            "pos_x": 478249.32830743806,
+            "pos_y": 6470896.06771031,
+            "damages_states_constructor": null
+        },
+        "5065": {
+            "component_type": null,
+            "component_class": null,
+            "cost_fraction": null,
+            "node_type": null,
+            "node_cluster": null,
+            "operation_capacity": null,
+            "pos_x": 439681.9199742241,
+            "pos_y": 6480960.456447452,
+            "damages_states_constructor": null
+        },
+        "5066A": {
+            "component_type": null,
+            "component_class": null,
+            "cost_fraction": null,
+            "node_type": null,
+            "node_cluster": null,
+            "operation_capacity": null,
+            "pos_x": 476199.6773456836,
+            "pos_y": 6489649.566164293,
+            "damages_states_constructor": null
+        },
+        "5074": {
+            "component_type": null,
+            "component_class": null,
+            "cost_fraction": null,
+            "node_type": null,
+            "node_cluster": null,
+            "operation_capacity": null,
+            "pos_x": 579337.442084937,
+            "pos_y": 6454680.045461239,
+            "damages_states_constructor": null
+        },
+        "5075": {
+            "component_type": null,
+            "component_class": null,
+            "cost_fraction": null,
+            "node_type": null,
+            "node_cluster": null,
+            "operation_capacity": null,
+            "pos_x": 608054.9170549,
+            "pos_y": 6462005.934716903,
+            "damages_states_constructor": null
+        },
+        "5076": {
+            "component_type": null,
+            "component_class": null,
+            "cost_fraction": null,
+            "node_type": null,
+            "node_cluster": null,
+            "operation_capacity": null,
+            "pos_x": 610560.042727144,
+            "pos_y": 6465307.090273136,
+            "damages_states_constructor": null
+        },
+        "5078": {
+            "component_type": null,
+            "component_class": null,
+            "cost_fraction": null,
+            "node_type": null,
+            "node_cluster": null,
+            "operation_capacity": null,
+            "pos_x": 606518.0847886895,
+            "pos_y": 6485963.3978456855,
+            "damages_states_constructor": null
+        },
+        "5079": {
+            "component_type": null,
+            "component_class": null,
+            "cost_fraction": null,
+            "node_type": null,
+            "node_cluster": null,
+            "operation_capacity": null,
+            "pos_x": 589804.2130886754,
+            "pos_y": 6459031.210289573,
+            "damages_states_constructor": null
+        },
+        "5080": {
+            "component_type": null,
+            "component_class": null,
+            "cost_fraction": null,
+            "node_type": null,
+            "node_cluster": null,
+            "operation_capacity": null,
+            "pos_x": 567319.8148035099,
+            "pos_y": 6458879.065625418,
+            "damages_states_constructor": null
+        },
+        "5081": {
+            "component_type": null,
+            "component_class": null,
+            "cost_fraction": null,
+            "node_type": null,
+            "node_cluster": null,
+            "operation_capacity": null,
+            "pos_x": 566810.7063271084,
+            "pos_y": 6458882.409549773,
+            "damages_states_constructor": null
+        },
+        "5082": {
+            "component_type": null,
+            "component_class": null,
+            "cost_fraction": null,
+            "node_type": null,
+            "node_cluster": null,
+            "operation_capacity": null,
+            "pos_x": 590177.1976195371,
+            "pos_y": 6456190.730705643,
+            "damages_states_constructor": null
+        },
+        "5083": {
+            "component_type": null,
+            "component_class": null,
+            "cost_fraction": null,
+            "node_type": null,
+            "node_cluster": null,
+            "operation_capacity": null,
+            "pos_x": 590154.6950161943,
+            "pos_y": 6449231.206090767,
+            "damages_states_constructor": null
+        },
+        "5084": {
+            "component_type": null,
+            "component_class": null,
+            "cost_fraction": null,
+            "node_type": null,
+            "node_cluster": null,
+            "operation_capacity": null,
+            "pos_x": 596525.5899790867,
+            "pos_y": 6470699.458098955,
+            "damages_states_constructor": null
+        },
+        "5085": {
+            "component_type": null,
+            "component_class": null,
+            "cost_fraction": null,
+            "node_type": null,
+            "node_cluster": null,
+            "operation_capacity": null,
+            "pos_x": 584676.1014871072,
+            "pos_y": 6469958.121847911,
+            "damages_states_constructor": null
+        },
+        "5086": {
+            "component_type": null,
+            "component_class": null,
+            "cost_fraction": null,
+            "node_type": null,
+            "node_cluster": null,
+            "operation_capacity": null,
+            "pos_x": 593896.8910160561,
+            "pos_y": 6479274.351676252,
+            "damages_states_constructor": null
+        },
+        "5089": {
+            "component_type": null,
+            "component_class": null,
+            "cost_fraction": null,
+            "node_type": null,
+            "node_cluster": null,
+            "operation_capacity": null,
+            "pos_x": 598024.9537011331,
+            "pos_y": 6480537.187423996,
+            "damages_states_constructor": null
+        },
+        "5091A": {
+            "component_type": null,
+            "component_class": null,
+            "cost_fraction": null,
+            "node_type": null,
+            "node_cluster": null,
+            "operation_capacity": null,
+            "pos_x": 605519.7041731564,
+            "pos_y": 6490491.830217027,
+            "damages_states_constructor": null
+        },
         "5093": {
             "component_type": null,
             "component_class": null,
@@ -1522,6 +3449,39 @@
             "operation_capacity": null,
             "pos_x": 603975.3710282276,
             "pos_y": 6440782.379431693,
+            "damages_states_constructor": null
+        },
+        "5094": {
+            "component_type": null,
+            "component_class": null,
+            "cost_fraction": null,
+            "node_type": null,
+            "node_cluster": null,
+            "operation_capacity": null,
+            "pos_x": 596612.891775215,
+            "pos_y": 6491473.503247383,
+            "damages_states_constructor": null
+        },
+        "5095": {
+            "component_type": null,
+            "component_class": null,
+            "cost_fraction": null,
+            "node_type": null,
+            "node_cluster": null,
+            "operation_capacity": null,
+            "pos_x": 598947.5934143874,
+            "pos_y": 6488840.962158197,
+            "damages_states_constructor": null
+        },
+        "5097": {
+            "component_type": null,
+            "component_class": null,
+            "cost_fraction": null,
+            "node_type": null,
+            "node_cluster": null,
+            "operation_capacity": null,
+            "pos_x": 611660.3787336746,
+            "pos_y": 6439708.329143263,
             "damages_states_constructor": null
         },
         "5099A": {
@@ -1546,6 +3506,116 @@
             "pos_y": 6463576.976770895,
             "damages_states_constructor": null
         },
+        "5102": {
+            "component_type": null,
+            "component_class": null,
+            "cost_fraction": null,
+            "node_type": null,
+            "node_cluster": null,
+            "operation_capacity": null,
+            "pos_x": 609180.1083752024,
+            "pos_y": 6471089.250610774,
+            "damages_states_constructor": null
+        },
+        "5104": {
+            "component_type": null,
+            "component_class": null,
+            "cost_fraction": null,
+            "node_type": null,
+            "node_cluster": null,
+            "operation_capacity": null,
+            "pos_x": 544376.787395711,
+            "pos_y": 6469998.976580851,
+            "damages_states_constructor": null
+        },
+        "5105": {
+            "component_type": null,
+            "component_class": null,
+            "cost_fraction": null,
+            "node_type": null,
+            "node_cluster": null,
+            "operation_capacity": null,
+            "pos_x": 550761.0656450306,
+            "pos_y": 6453319.686116855,
+            "damages_states_constructor": null
+        },
+        "5166": {
+            "component_type": null,
+            "component_class": null,
+            "cost_fraction": null,
+            "node_type": null,
+            "node_cluster": null,
+            "operation_capacity": null,
+            "pos_x": 616798.5522999859,
+            "pos_y": 6457644.780986631,
+            "damages_states_constructor": null
+        },
+        "5167": {
+            "component_type": null,
+            "component_class": null,
+            "cost_fraction": null,
+            "node_type": null,
+            "node_cluster": null,
+            "operation_capacity": null,
+            "pos_x": 616798.2928720369,
+            "pos_y": 6457845.01255516,
+            "damages_states_constructor": null
+        },
+        "5168": {
+            "component_type": null,
+            "component_class": null,
+            "cost_fraction": null,
+            "node_type": null,
+            "node_cluster": null,
+            "operation_capacity": null,
+            "pos_x": 614356.6416105612,
+            "pos_y": 6465712.82750174,
+            "damages_states_constructor": null
+        },
+        "5169": {
+            "component_type": null,
+            "component_class": null,
+            "cost_fraction": null,
+            "node_type": null,
+            "node_cluster": null,
+            "operation_capacity": null,
+            "pos_x": 619412.5096339891,
+            "pos_y": 6460656.571656818,
+            "damages_states_constructor": null
+        },
+        "5234": {
+            "component_type": null,
+            "component_class": null,
+            "cost_fraction": null,
+            "node_type": null,
+            "node_cluster": null,
+            "operation_capacity": null,
+            "pos_x": 625968.0808159861,
+            "pos_y": 6485387.738524623,
+            "damages_states_constructor": null
+        },
+        "5236": {
+            "component_type": null,
+            "component_class": null,
+            "cost_fraction": null,
+            "node_type": null,
+            "node_cluster": null,
+            "operation_capacity": null,
+            "pos_x": 584714.8782646027,
+            "pos_y": 6465957.38859297,
+            "damages_states_constructor": null
+        },
+        "5268": {
+            "component_type": null,
+            "component_class": null,
+            "cost_fraction": null,
+            "node_type": null,
+            "node_cluster": null,
+            "operation_capacity": null,
+            "pos_x": 566875.3058107378,
+            "pos_y": 6500352.11454433,
+            "damages_states_constructor": null
+        },
         "5281": {
             "component_type": null,
             "component_class": null,
@@ -1557,6 +3627,193 @@
             "pos_y": 6448579.347940061,
             "damages_states_constructor": null
         },
+        "5282": {
+            "component_type": null,
+            "component_class": null,
+            "cost_fraction": null,
+            "node_type": null,
+            "node_cluster": null,
+            "operation_capacity": null,
+            "pos_x": 596322.8181792713,
+            "pos_y": 6467711.62353519,
+            "damages_states_constructor": null
+        },
+        "5298": {
+            "component_type": null,
+            "component_class": null,
+            "cost_fraction": null,
+            "node_type": null,
+            "node_cluster": null,
+            "operation_capacity": null,
+            "pos_x": 467314.9134207509,
+            "pos_y": 6505447.669180504,
+            "damages_states_constructor": null
+        },
+        "5351": {
+            "component_type": null,
+            "component_class": null,
+            "cost_fraction": null,
+            "node_type": null,
+            "node_cluster": null,
+            "operation_capacity": null,
+            "pos_x": 625174.4951480814,
+            "pos_y": 6444858.469441371,
+            "damages_states_constructor": null
+        },
+        "6007": {
+            "component_type": null,
+            "component_class": null,
+            "cost_fraction": null,
+            "node_type": null,
+            "node_cluster": null,
+            "operation_capacity": null,
+            "pos_x": 611305.8133694829,
+            "pos_y": 6456561.905487994,
+            "damages_states_constructor": null
+        },
+        "6008": {
+            "component_type": null,
+            "component_class": null,
+            "cost_fraction": null,
+            "node_type": null,
+            "node_cluster": null,
+            "operation_capacity": null,
+            "pos_x": 622594.111143038,
+            "pos_y": 6490119.285055898,
+            "damages_states_constructor": null
+        },
+        "6011": {
+            "component_type": null,
+            "component_class": null,
+            "cost_fraction": null,
+            "node_type": null,
+            "node_cluster": null,
+            "operation_capacity": null,
+            "pos_x": 610667.3873117667,
+            "pos_y": 6488635.009718472,
+            "damages_states_constructor": null
+        },
+        "6013": {
+            "component_type": null,
+            "component_class": null,
+            "cost_fraction": null,
+            "node_type": null,
+            "node_cluster": null,
+            "operation_capacity": null,
+            "pos_x": 611239.1058403666,
+            "pos_y": 6472923.981081914,
+            "damages_states_constructor": null
+        },
+        "6023": {
+            "component_type": null,
+            "component_class": null,
+            "cost_fraction": null,
+            "node_type": null,
+            "node_cluster": null,
+            "operation_capacity": null,
+            "pos_x": 593072.9279751132,
+            "pos_y": 6466406.27923068,
+            "damages_states_constructor": null
+        },
+        "6026": {
+            "component_type": null,
+            "component_class": null,
+            "cost_fraction": null,
+            "node_type": null,
+            "node_cluster": null,
+            "operation_capacity": null,
+            "pos_x": 573149.990333369,
+            "pos_y": 6467977.043209963,
+            "damages_states_constructor": null
+        },
+        "6028A": {
+            "component_type": null,
+            "component_class": null,
+            "cost_fraction": null,
+            "node_type": null,
+            "node_cluster": null,
+            "operation_capacity": null,
+            "pos_x": 573199.8256833279,
+            "pos_y": 6473900.219897822,
+            "damages_states_constructor": null
+        },
+        "6033": {
+            "component_type": null,
+            "component_class": null,
+            "cost_fraction": null,
+            "node_type": null,
+            "node_cluster": null,
+            "operation_capacity": null,
+            "pos_x": 587375.7369956726,
+            "pos_y": 6463725.6603037,
+            "damages_states_constructor": null
+        },
+        "6034A": {
+            "component_type": null,
+            "component_class": null,
+            "cost_fraction": null,
+            "node_type": null,
+            "node_cluster": null,
+            "operation_capacity": null,
+            "pos_x": 587378.0378171533,
+            "pos_y": 6463707.349370999,
+            "damages_states_constructor": null
+        },
+        "6035": {
+            "component_type": null,
+            "component_class": null,
+            "cost_fraction": null,
+            "node_type": null,
+            "node_cluster": null,
+            "operation_capacity": null,
+            "pos_x": 586749.9573543009,
+            "pos_y": 6471121.939837157,
+            "damages_states_constructor": null
+        },
+        "6038": {
+            "component_type": null,
+            "component_class": null,
+            "cost_fraction": null,
+            "node_type": null,
+            "node_cluster": null,
+            "operation_capacity": null,
+            "pos_x": 622284.0094454654,
+            "pos_y": 6464802.860289,
+            "damages_states_constructor": null
+        },
+        "6042": {
+            "component_type": null,
+            "component_class": null,
+            "cost_fraction": null,
+            "node_type": null,
+            "node_cluster": null,
+            "operation_capacity": null,
+            "pos_x": 590029.678880988,
+            "pos_y": 6449074.892421247,
+            "damages_states_constructor": null
+        },
+        "6044": {
+            "component_type": null,
+            "component_class": null,
+            "cost_fraction": null,
+            "node_type": null,
+            "node_cluster": null,
+            "operation_capacity": null,
+            "pos_x": 565710.8900978499,
+            "pos_y": 6461181.714275137,
+            "damages_states_constructor": null
+        },
+        "6046": {
+            "component_type": null,
+            "component_class": null,
+            "cost_fraction": null,
+            "node_type": null,
+            "node_cluster": null,
+            "operation_capacity": null,
+            "pos_x": 587884.5867834934,
+            "pos_y": 6474277.963561278,
+            "damages_states_constructor": null
+        },
         "6223A": {
             "component_type": null,
             "component_class": null,
@@ -1566,6 +3823,127 @@
             "operation_capacity": null,
             "pos_x": 603521.1908085616,
             "pos_y": 6463486.522580711,
+            "damages_states_constructor": null
+        },
+        "7259": {
+            "component_type": null,
+            "component_class": null,
+            "cost_fraction": null,
+            "node_type": null,
+            "node_cluster": null,
+            "operation_capacity": null,
+            "pos_x": 435835.33158946637,
+            "pos_y": 6449389.796681359,
+            "damages_states_constructor": null
+        },
+        "7262": {
+            "component_type": null,
+            "component_class": null,
+            "cost_fraction": null,
+            "node_type": null,
+            "node_cluster": null,
+            "operation_capacity": null,
+            "pos_x": 425681.9016022942,
+            "pos_y": 6463734.757519627,
+            "damages_states_constructor": null
+        },
+        "7263A": {
+            "component_type": null,
+            "component_class": null,
+            "cost_fraction": null,
+            "node_type": null,
+            "node_cluster": null,
+            "operation_capacity": null,
+            "pos_x": 433235.0818474681,
+            "pos_y": 6462862.248315006,
+            "damages_states_constructor": null
+        },
+        "7264": {
+            "component_type": null,
+            "component_class": null,
+            "cost_fraction": null,
+            "node_type": null,
+            "node_cluster": null,
+            "operation_capacity": null,
+            "pos_x": 421419.330336606,
+            "pos_y": 6462157.265265163,
+            "damages_states_constructor": null
+        },
+        "7265": {
+            "component_type": null,
+            "component_class": null,
+            "cost_fraction": null,
+            "node_type": null,
+            "node_cluster": null,
+            "operation_capacity": null,
+            "pos_x": 423251.6591736857,
+            "pos_y": 6461409.735361391,
+            "damages_states_constructor": null
+        },
+        "7267": {
+            "component_type": null,
+            "component_class": null,
+            "cost_fraction": null,
+            "node_type": null,
+            "node_cluster": null,
+            "operation_capacity": null,
+            "pos_x": 428078.0539066541,
+            "pos_y": 6456478.767159216,
+            "damages_states_constructor": null
+        },
+        "7269": {
+            "component_type": null,
+            "component_class": null,
+            "cost_fraction": null,
+            "node_type": null,
+            "node_cluster": null,
+            "operation_capacity": null,
+            "pos_x": 431492.8627321904,
+            "pos_y": 6453953.781099531,
+            "damages_states_constructor": null
+        },
+        "7276": {
+            "component_type": null,
+            "component_class": null,
+            "cost_fraction": null,
+            "node_type": null,
+            "node_cluster": null,
+            "operation_capacity": null,
+            "pos_x": 431153.5045675236,
+            "pos_y": 6460763.114229357,
+            "damages_states_constructor": null
+        },
+        "7521": {
+            "component_type": null,
+            "component_class": null,
+            "cost_fraction": null,
+            "node_type": null,
+            "node_cluster": null,
+            "operation_capacity": null,
+            "pos_x": 424255.81245789176,
+            "pos_y": 6496697.62879331,
+            "damages_states_constructor": null
+        },
+        "7522": {
+            "component_type": null,
+            "component_class": null,
+            "cost_fraction": null,
+            "node_type": null,
+            "node_cluster": null,
+            "operation_capacity": null,
+            "pos_x": 423173.38038167905,
+            "pos_y": 6497169.618771018,
+            "damages_states_constructor": null
+        },
+        "7523": {
+            "component_type": null,
+            "component_class": null,
+            "cost_fraction": null,
+            "node_type": null,
+            "node_cluster": null,
+            "operation_capacity": null,
+            "pos_x": 423163.81814676523,
+            "pos_y": 6497819.114536961,
             "damages_states_constructor": null
         },
         "9186": {
@@ -1599,105 +3977,6 @@
             "operation_capacity": null,
             "pos_x": 454455.9653624478,
             "pos_y": 6490448.0678252885,
-            "damages_states_constructor": null
-        },
-        "0641": {
-            "component_type": null,
-            "component_class": null,
-            "cost_fraction": null,
-            "node_type": null,
-            "node_cluster": null,
-            "operation_capacity": null,
-            "pos_x": 568014.8913575463,
-            "pos_y": 6504355.600563351,
-            "damages_states_constructor": null
-        },
-        "1065": {
-            "component_type": null,
-            "component_class": null,
-            "cost_fraction": null,
-            "node_type": null,
-            "node_cluster": null,
-            "operation_capacity": null,
-            "pos_x": 523897.73266548594,
-            "pos_y": 6493959.959340162,
-            "damages_states_constructor": null
-        },
-        "0369": {
-            "component_type": null,
-            "component_class": null,
-            "cost_fraction": null,
-            "node_type": null,
-            "node_cluster": null,
-            "operation_capacity": null,
-            "pos_x": 444579.4702607876,
-            "pos_y": 6501821.979712518,
-            "damages_states_constructor": null
-        },
-        "0714": {
-            "component_type": null,
-            "component_class": null,
-            "cost_fraction": null,
-            "node_type": null,
-            "node_cluster": null,
-            "operation_capacity": null,
-            "pos_x": 540194.058705047,
-            "pos_y": 6453093.828265678,
-            "damages_states_constructor": null
-        },
-        "0715": {
-            "component_type": null,
-            "component_class": null,
-            "cost_fraction": null,
-            "node_type": null,
-            "node_cluster": null,
-            "operation_capacity": null,
-            "pos_x": 540417.2088192248,
-            "pos_y": 6452948.845035964,
-            "damages_states_constructor": null
-        },
-        "0717": {
-            "component_type": null,
-            "component_class": null,
-            "cost_fraction": null,
-            "node_type": null,
-            "node_cluster": null,
-            "operation_capacity": null,
-            "pos_x": 550932.7651279283,
-            "pos_y": 6451163.601557279,
-            "damages_states_constructor": null
-        },
-        "4815": {
-            "component_type": null,
-            "component_class": null,
-            "cost_fraction": null,
-            "node_type": null,
-            "node_cluster": null,
-            "operation_capacity": null,
-            "pos_x": 467668.6627806113,
-            "pos_y": 6490288.745561229,
-            "damages_states_constructor": null
-        },
-        "4154": {
-            "component_type": null,
-            "component_class": null,
-            "cost_fraction": null,
-            "node_type": null,
-            "node_cluster": null,
-            "operation_capacity": null,
-            "pos_x": 471876.7226417431,
-            "pos_y": 6484912.049114374,
-            "damages_states_constructor": null
-        },
-        "4156": {
-            "component_type": null,
-            "component_class": null,
-            "cost_fraction": null,
-            "node_type": null,
-            "node_cluster": null,
-            "operation_capacity": null,
-            "pos_x": 480362.9769775824,
-            "pos_y": 6480631.586534279,
             "damages_states_constructor": null
         }
     }

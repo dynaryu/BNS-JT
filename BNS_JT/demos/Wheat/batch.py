@@ -131,6 +131,7 @@ def plot():
     cfg = config.Config(HOME.joinpath('./config.json'))
 
     trans.plot_graph(cfg.infra['G'], HOME.joinpath('wheat.png'))
+    config.plot_graphviz(cfg.infra['G'], outfile=HOME.joinpath('wheat_graph.png'))
 
 
 def generate_default():
