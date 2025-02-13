@@ -296,11 +296,11 @@ def get_state(comp, rules):
     assert isinstance(rules, dict), f'rules should be a dict: {type(rules)}'
 
     # the survival rule is satisfied
-    no_s = sum([all([comp[k] >= v for k, v in rule.items()])
-                for rule in rules['s']])
+    s_rules = [i for (i,rule) in enumerate(rules['s']) if all([comp[k] >= v for k, v in rule.items()])]
+    no_s = len(s_rules)
 
-    no_f = sum([all([comp[k] <= v for k, v in rule.items()])
-                 for rule in rules['f']])
+    f_rules = [i for (i,rule) in enumerate(rules['f']) if all([comp[k] <= v for k, v in rule.items()])]
+    no_f = len(f_rules)
 
     # no compatible rules. the state remains unknown
     if no_s == no_f == 0:
@@ -311,8 +311,8 @@ def get_state(comp, rules):
         state = 'f'
 
     if no_s > 0 and no_f > 0:
-        rules_s = [rule for rule in rules['s'] if all([comp[k] >= v for k, v in rule.items()])]
-        rules_f = [rule for rule in rules['f'] if all([comp[k] <= v for k, v in rule.items()])]
+        rules_s = [rules['s'][i] for i in s_rules]
+        rules_f = [rules['f'][i] for i in f_rules]
 
         print(f"Conflicting rules found: {rules_s} vs. {rules_f}. The given system is not coherent.")
 
