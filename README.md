@@ -1,11 +1,11 @@
 # MBNPy toolkit
 
 ## Description
-MBNPy is a Bayesian Network toolkit designed to handle a large number of parent nodes—problems where conventional BN tools often fall short.
+MBNPy is a Bayesian Network toolkit designed to handle a large number of parent nodes—problems where conventional BN tools often fall short.  
 Example applications include [transport networks](https://doi.org/10.1016/j.ress.2019.01.007) and [pipeline networks](https://doi.org/10.1016/j.ress.2021.107468).
 
 ## Contact
-If you have discussion points, refer to the [discussions tab](https://github.com/jieunbyun/BNS-JT/discussions).
+If you have discussion points, refer to the [discussions tab](https://github.com/jieunbyun/BNS-JT/discussions).  
 If you have need support, refer to the [issues tab](https://github.com/jieunbyun/BNS-JT/issues).
 
 ## Installation
