@@ -195,7 +195,7 @@ def networkx_to_graphviz(g):
     for u, d in g.nodes(data=True):
         h.node(str(u), label=d['label'])
     for u, v, d in g.edges(data=True):
-        h.edge(str(u), str(v), label=d['label'])
+        h.edge(str(u), str(v), label=f"{d['label']}({d['weight']})")
     return h
 
 
