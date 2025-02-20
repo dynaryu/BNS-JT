@@ -96,16 +96,19 @@ def create_shpfile(json_file: str, prob_by_path: dict, outfile: str) -> None:
     with open(json_file, 'r') as f:
         directions_result = json.load(f)
 
+    keys = sorted(prob_by_path.keys())
+
     _dic = {}
-    for k, item in directions_result.items():
-        poly_line = item[0]['overview_polyline']['points']
+    for k, item in zip(keys, directions_result):
+        poly_line = item['overview_polyline']['points']
         geometry_points = [(x[1], x[0]) for x in polyline.decode(poly_line)]
 
-        _dic[k] = {'distance': item[0]['legs'][0]['distance']['text'],
-                   'duration': item[0]['legs'][0]['duration']['text'],
+        distance_km = sum([x['distance']['value']  for x in item['legs']]) / 1000.0
+        duration_mins = sum([x['duration']['value']  for x in item['legs']]) / 60.0
+
+        _dic[k] = {'dist_km': distance_km,
+                   'duration_m': duration_mins,
                    'line': shapely.LineString(geometry_points),
-                   'start': item[0]['legs'][0]['start_address'],
-                   'end': item[0]['legs'][0]['end_address'],
                    'id': k,
                    'prob': prob_by_path.get(k, 0)
                    }
@@ -532,8 +535,9 @@ def route(file_model: str, file_dmg: str) -> None:
 
     # create shp file
     json_file = Path(file_model).parent.joinpath(Path(file_model).stem + '_direction.json')
-    outfile = cfg.output_path.joinpath(f'{Path(file_model).stem}_{Path(file_dmg).stem}_route.shp')
-    create_shpfile(json_file, prob_by_path, outfile)
+    if json_file.exists():
+        outfile = cfg.output_path.joinpath(f'{Path(file_model).stem}_{Path(file_dmg).stem}_route.shp')
+        create_shpfile(json_file, prob_by_path, outfile)
 
 
 
