@@ -37,7 +37,12 @@ def k_shortest_paths(G, source, target, k, weight=None):
     )
 
 
-def update_nodes_given_dmg(file_dmg: str, nodes: dict) -> None:
+def update_nodes_given_dmg(file_dmg: str, nodes: dict, valid_paths) -> None:
+
+    # selected nodes
+    sel_nodes = [x for _, v in valid_paths.items() for x in v['path']]
+    to_be_removed = set(nodes.keys()).difference(sel_nodes)
+    [nodes.pop(k) for k in to_be_removed]
 
     # assign cpms given scenario
     if file_dmg.endswith('csv'):
@@ -58,7 +63,10 @@ def update_nodes_given_dmg(file_dmg: str, nodes: dict) -> None:
                     }
 
         # from percent 
-        probs = 0.01 * pd.DataFrame.from_dict(probs).T
+        probs = pd.DataFrame.from_dict(probs).T
+        if probs.max().max() > 1:
+            print(f'Probability should be 0 to 1 scale: {probs.max().max():.2f}')
+            probs *= 0.01
 
     # failiure defined 
     probs['failure'] = probs['Extensive'] + probs['Complete']
@@ -404,7 +412,8 @@ def setup_model(key: str='Wooroloo-Merredin',
     with open(output_model, 'wb') as f:
         dump = {'cpms': cpms,
                 'varis': varis,
-                'valid_paths': valid_paths}
+                'valid_paths': valid_paths,
+                'cfg': cfg}
         pickle.dump(dump, f)
     print(f'{output_model} saved')
 
@@ -419,18 +428,23 @@ def setup_model(key: str='Wooroloo-Merredin',
     return output_model
 
 @app.command()
-def batch(file_dmg: str,
-          key: Annotated[str, typer.Argument()] = 'Wooroloo-Merredin'):
+def single(key: str,
+          file_dmg: str,
+          route_file: str=None) -> None:
+    """
+    key: 'York-Merredin'
+    file_dmg:
+    route_file:
+    """
+    file_model = setup_model(key=key, route_file=route_file)
 
-    output_model = setup_model(key)
+    reliability(file_model=file_model, file_dmg=file_dmg)
 
-    route(file_model=output_model, file_dmg=file_dmg)
-
-    inference(file_model=output_model, file_dmg=file_dmg)
+    inference(file_model=file_model, file_dmg=file_dmg)
 
 
 @app.command()
-def batch_all(file_dmg: str):
+def batch(file_dmg: str):
 
     cfg = config.Config(HOME.joinpath('./config.json'))
 
@@ -442,18 +456,17 @@ def batch_all(file_dmg: str):
 @app.command()
 def inference(file_model: str, file_dmg: str) -> None:
 
-    cfg = config.Config(HOME.joinpath('./config.json'))
-
     with open(file_model, 'rb') as f:
         dump = pickle.load(f)
 
+    cfg = dump['cfg']
     cpms = dump['cpms']
     varis = dump['varis']
     valid_paths = dump['valid_paths']
     path_names = list(valid_paths.keys())
     no_paths = len(path_names)
 
-    update_nodes_given_dmg(file_dmg, cfg.infra['nodes'])
+    update_nodes_given_dmg(file_dmg, cfg.infra['nodes'], valid_paths)
 
     for k, v in cfg.infra['nodes'].items():
         cpms[k] = cpm.Cpm(variables = [varis[k]], no_child=1,
@@ -493,20 +506,25 @@ def inference(file_model: str, file_dmg: str) -> None:
 
 
 @app.command()
-def route(file_model: str, file_dmg: str) -> None:
+def reliability(file_model: str, file_dmg: str) -> None:
+    """
+    compute the likelihood of routes being available
+    file_model:
+    file_dmg
 
-    cfg = config.Config(HOME.joinpath('./config.json'))
+    """
 
     with open(file_model, 'rb') as f:
         dump = pickle.load(f)
 
+    cfg = dump['cfg']
     cpms = dump['cpms']
     varis = dump['varis']
     valid_paths = dump['valid_paths']
     path_names = list(valid_paths.keys())
     no_paths = len(path_names)
 
-    update_nodes_given_dmg(file_dmg, cfg.infra['nodes'])
+    update_nodes_given_dmg(file_dmg, cfg.infra['nodes'], valid_paths)
 
     for k, v in cfg.infra['nodes'].items():
         cpms[k] = cpm.Cpm(variables = [varis[k]], no_child=1,
@@ -514,31 +532,33 @@ def route(file_model: str, file_dmg: str) -> None:
 
     od_name = '_'.join(path_names[0].split('_')[:-1])
 
-    paths_rel = []
+    paths_rel = {}
     VE_ord = list(cfg.infra['nodes'].keys()) + path_names
     for path in path_names:
         vars_inf = operation.get_inf_vars(cpms, path, VE_ord)
         Mpath = operation.variable_elim([cpms[k] for k in vars_inf], [v for v in vars_inf if v!=path])
-        paths_rel.append(Mpath.p[1][0] )
+        paths_rel[path] = Mpath.p[1][0]
 
-    prob_by_path = {x:y for x,y in zip(path_names, paths_rel)}
-
-    plt.figure()
-    plt.bar(range(len(paths_rel)), paths_rel, tick_label=range(len(paths_rel)))
-
-    plt.xlabel(f"Route: {od_name}")
-    plt.ylabel("Reliability")
+    fig, ax = plt.subplots()
+    ax.bar(range(len(paths_rel)), paths_rel.values(), tick_label=list(paths_rel.keys()))
+    fig.autofmt_xdate()
+    ax.set_xlabel(f"Route: {od_name}")
+    ax.set_ylabel("Reliability")
 
     file_output = cfg.output_path.joinpath(f'{Path(file_dmg).stem}_{od_name}_routes.png')
-    plt.savefig(file_output, dpi=100)
+    fig.savefig(file_output, dpi=100)
     print(f'{file_output} saved')
 
     # create shp file
     json_file = Path(file_model).parent.joinpath(Path(file_model).stem + '_direction.json')
     if json_file.exists():
         outfile = cfg.output_path.joinpath(f'{Path(file_model).stem}_{Path(file_dmg).stem}_route.shp')
-        create_shpfile(json_file, prob_by_path, outfile)
+        create_shpfile(json_file, paths_rel, outfile)
 
+        # nodes
+        outfile = cfg.output_path.joinpath(f'{Path(file_model).stem}_{Path(file_dmg).stem}_nodes.csv')
+        df_pf = pd.Series({x: v['failure'] for x, v in cfg.infra['nodes'].items()}, name='failure')
+        df_pf.sort_values(ascending=False).to_csv(outfile, float_format='%.2f')
 
 
 if __name__=='__main__':
